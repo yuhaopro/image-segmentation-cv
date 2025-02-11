@@ -50,4 +50,7 @@ sudo apt install p7zip-full
 ## Model Training
 We will be performing supervised training on the models to allow them to extract the features from the image and correctly map the objects to their semantic classes (colors).
 
+### CLIP
+(Video Explanation)[https://www.youtube.com/watch?v=T9XSU0pKX2E]
+
 
