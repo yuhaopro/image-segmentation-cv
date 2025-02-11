@@ -19,8 +19,11 @@ An image segmentation simply divides the image into different regions.
 A semantic segmentation gives a class to each pixel in the image.
 
 Take a look at this cat image.
+<br>
 ![image](Abyssinian_1_color.jpg)
+
 The semantic mask is as follows.
+<br>
 ![image](Abyssinian_1_mask.png)
 
 | Object    | Semantic Color |
