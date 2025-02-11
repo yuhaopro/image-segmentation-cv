@@ -27,6 +27,23 @@ The semantic mask is as follows.
 | -------- | ------- |
 | cat  | red with white outline   |
 | couch & wall | black     |
+## Setting up the Dataset
+The dataset can be found [here](https://uoe-my.sharepoint.com/:u:/g/personal/s2526104_ed_ac_uk/EXBmCQKQ7KdAmOr0P9c1lFwBwYaqySQ1d8gps8I7CcRPnw?e=VBex8K).
+
+This dataset is a multipart archive so it cannot be unzipped with `unzip` if you are using linux.
+
+### Linux
+1. install 7zip
+```
+sudo apt install p7zip-full
+```
+2. unzip using 7z
+```
+7z x Dataset.zip
+```
+### Windows
+1. Download 7zip or use Windows built in archive tool
+2. Extract the `Dataset.zip` file into your project directory using the GUI.
 ## Model Training
 We will be performing supervised training on the models to allow them to extract the features from the image and correctly map the objects to their semantic classes (colors).
 
