@@ -1,2 +1,6 @@
 Dataset/
 Dataset.zip
+env
+pytorch_dataset.py
+.venv
+processed_dataset/

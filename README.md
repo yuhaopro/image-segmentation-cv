@@ -20,11 +20,11 @@ A semantic segmentation gives a class to each pixel in the image.
 
 Take a look at this cat image.
 <br>
-![image](Abyssinian_1_color.jpg)
+![image](images/Abyssinian_1_color.jpg)
 
 The semantic mask is as follows.
 <br>
-![image](Abyssinian_1_mask.png)
+![image](images/Abyssinian_1_mask.png)
 
 | Object    | Semantic Color |
 | -------- | ------- |
@@ -33,24 +33,43 @@ The semantic mask is as follows.
 ## Setting up the Dataset
 The dataset can be found [here](https://uoe-my.sharepoint.com/:u:/g/personal/s2526104_ed_ac_uk/EXBmCQKQ7KdAmOr0P9c1lFwBwYaqySQ1d8gps8I7CcRPnw?e=VBex8K).
 
-This dataset is a multipart archive so it cannot be unzipped with `unzip` if you are using linux.
-
 ### Linux
-1. install 7zip
-```
+```bash
+# install 7zip
 sudo apt install p7zip-full
-```
-2. unzip using 7z
-```
+
+# unzip with 7zip
 7z x Dataset.zip
 ```
 ### Windows
 1. Download 7zip or use Windows built in archive tool
-2. Extract the `Dataset.zip` file into your project directory using the GUI.
-## Model Training
-We will be performing supervised training on the models to allow them to extract the features from the image and correctly map the objects to their semantic classes (colors).
+2. Extract the `Dataset.zip` file into your project directory
+## Setting up the Python environment
+
+```py
+# creating the environment
+pip install virtualenv
+cd /Projects/image-segmentation-cv
+python3 -m virtualenv env
+source env/bin/activate
+
+# installing dependencies
+python3 -r requirements.txt
+
+# exit the environment
+deactivate
+```
 
 ### CLIP
-[Video Explanation](https://www.youtube.com/watch?v=T9XSU0pKX2E)
+The concept is that the pre-trained image encoder in CLIP is trained on a vast dataset which allows it to learn robust visual features. This means the encoder can identify complex patterns that are helpful for segmentation tasks.
+<br />
 
+I plan to evaluate the performance of 2 different models.
+| Model    | Reasoning |
+| -------- | ------- |
+| CLIP Encoder + CNN  | encoder contains feature rich information, can be used as a downstream for segmentation map    |
+| CLIPSegModel (Zero Shot) | already built and can be used directly from huggingface as a baseline     |
+
+![clip_architecture](images/clip_architecture.png)
+![flow](images/flow.png)
 
