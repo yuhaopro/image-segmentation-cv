@@ -1,13 +1,9 @@
 albumentations==2.0.4
+clip==0.2.0
 datasets==3.3.2
-datasets[vision]
-matplotlib==3.10.0
+matplotlib==3.10.1
 numpy==2.2.3
-opencv-python==4.11.0.86
-pillow==11.1.0
-PyQt6==6.8.1
-tqdm==4.67.1
-transformers==4.49.0
-torch==2.6.0+cpu
-torchvision==0.21.0+cpu
-clip @ git+https://github.com/openai/CLIP.git@dcba3cb2e2827b402d2701e7e1c7d9fed8a20ef1
+Pillow==11.1.0
+torch==2.6.0
+torchvision==0.21.0
+pipreqs
