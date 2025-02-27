@@ -1,42 +1,60 @@
 
 import os
-from torch.utils.data import DataLoader, Dataset, random_split
+from torch.utils.data import Dataset
 import numpy as np
 from PIL import Image
+import torch
+# create proper class labels
+class_to_color = {
+    0: 0,    # Background
+    1: 38,   # Cat
+    2: 75,   # Dog
+    3: 255   # Boundary
+}
+
+color_to_class = {
+    0: 0,    # Background
+    38: 1,   # Cat
+    75: 2,   # Dog
+    255: 3   # Boundary
+}
+
+def convert_class_to_color(class_mask):
+    placeholder = torch.zeros_like(class_mask)
+    for class_idx, color in class_to_color.items():
+        placeholder[class_mask == class_idx] = color
+    return placeholder
+
+def convert_color_to_class(color_mask):
+    placeholder = torch.zeros_like(color_mask)
+    for color_idx, _class in color_to_class.items():
+        placeholder[color_mask == color_idx] = _class
+    return placeholder
+        
+def default_transform(image=None, mask=None):
+    return {"image": image, "mask": mask}
+
 class PetDataset(Dataset):
-    def __init__(self, image_dir, mask_dir, valid_masks, transform = None):
+    def __init__(self, image_dir, mask_dir, valid_masks, transform = default_transform):
         self.image_dir = image_dir
         self.mask_dir = mask_dir
         self.transform = transform
         self.images = valid_masks
 
-        # print(f"----Initialized Values----")
-        # print(f"{self.image_dir} | {self.mask_dir} | {self.transform} | {self.images}")
-
     def __len__(self):
         return len(self.images)
 
-    def __getitem__(self, index):
-        # print(f"index: {index}")
-        
+    def __getitem__(self, index):        
         img_path = os.path.join(self.image_dir, self.images[index]).replace(".png", ".jpg")
-        # print(f"Image path: {img_path}")
         mask_path = os.path.join(self.mask_dir, self.images[index])
-        # print(f"Mask path: {mask_path}")
 
         image = np.array(Image.open(img_path).convert("RGB"))
-        mask = np.array(Image.open(mask_path).convert("L"), dtype=np.float32) # gray scale
-        # mask[mask == 1 or mask == 2] = 1 # convert both cat and dog into a combined mask label for object
-        # print(f"Image Type: {type(image)}")
-        # print(f"Mask Type: {type(mask)}")
+        mask = np.array(Image.open(mask_path).convert("L"), dtype=np.float32)
 
-        
-        if self.transform is not None:
-            # print(f"Shape of image: {image.shape} Shape of mask: {mask.shape}")
-            augmented = self.transform(image=image, mask=mask)
-            image = augmented["image"]
-            mask = augmented["mask"]
-            # print(f"New shape of image: {image.shape} New shape of mask: {mask.shape}")
+        augmented = self.transform(image=image, mask=mask)
+        image = augmented["image"]
+        mask = augmented["mask"]
+        mask = convert_color_to_class(mask)
 
 
         return image, mask
