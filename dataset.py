@@ -30,6 +30,19 @@ def convert_color_to_class(color_mask):
     for color_idx, _class in color_to_class.items():
         placeholder[color_mask == color_idx] = _class
     return placeholder
+
+def add_class_dimension(mask):
+    # assuming mask is H*W
+    mask_by_class_list = []
+    for pet_class in sorted(color_to_class.values()):
+        temp = (mask == pet_class).float()
+        mask_by_class_list.append(temp)
+    output = torch.stack(mask_by_class_list)
+    return output
+
+def remove_class_dimension(mask):
+    class_indices = torch.argmax(mask, dim=0)
+    return class_indices
         
 def default_transform(image=None, mask=None):
     return {"image": image, "mask": mask}
@@ -55,6 +68,5 @@ class PetDataset(Dataset):
         image = augmented["image"]
         mask = augmented["mask"]
         mask = convert_color_to_class(mask)
-
-
+        # mask = add_class_dimension(mask)
         return image, mask

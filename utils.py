@@ -1,6 +1,11 @@
 import torch
 import torchvision
 from torch.utils.data import DataLoader
+import torch.nn.functional as F
+from UNET_model import UNET
+import torch.nn as nn
+import torch.optim as optim
+import pickle as pkl
 
 def save_checkpoint(state, filename="my_checkpoint.pth.tar"):
     print("=> Saving checkpoint")
@@ -42,27 +47,26 @@ def check_accuracy(loader, model, device="cuda"):
     num_pixels = 0
     dice_score = 0
     model.eval()
-
+    dice_score_cat = 0.0
+    dice_score_dog = 0.0
     with torch.no_grad():
         for x, y in loader:
             x = x.to(device)
-            y = y.to(device).unsqueeze(1)
-            preds = torch.sigmoid(model(x))
-            preds = (preds > 0.5).float()
-            num_correct += (preds == y).sum()
-            num_pixels += torch.numel(preds)
-            dice_score += (2 * (preds * y).sum()) / (
-                (preds + y).sum() + 1e-8
-            )
+            y = y.to(device).unsqueeze(1) # because mask does not have channel dimension, so need to add
+            output = model(x)
+            # print(f"output shape: {output.size()}")
+            probabilities = F.softmax(output, dim=1) # Shape [16,3,128,128]
+            # print(f"probabilities shape: {probabilities.size()}")
+            pred_classes = torch.argmax(probabilities, dim=1)
+            # print(f"pred_classes: {pred_classes.size()}")
+            # print(f"pred_classes_unique: {pred_classes.unique()}")
+            
 
-    print(
-        f"Got {num_correct}/{num_pixels} with acc {num_correct/num_pixels*100:.2f}"
-    )
-    print(f"Dice score: {dice_score/len(loader)}")
     model.train()
 
+# to edit the preds 
 def save_predictions_as_imgs(
-    loader, model, folder="saved_images/", device="cuda"
+    loader, model, folder="saved_images", device="cuda"
 ):
     model.eval()
     for idx, (x, y) in enumerate(loader):
@@ -77,3 +81,36 @@ def save_predictions_as_imgs(
 
     model.train()
 
+def main():
+    BATCH_SIZE = 16
+    PIN_MEMORY = True
+    NUM_WORKERS = 4
+    LEARNING_RATE = 0.00005
+    LOAD_MODEL = False
+    NUM_EPOCHS = 5
+    DEVICE = "cpu"
+
+    model = UNET(in_channels=3, out_channels=4).to(DEVICE)
+    loss_fn = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
+    with open("/teamspace/studios/this_studio/image-segmentation-cv/Dataset/train.pkl", "rb") as f:
+        train_dataset = pkl.load(f)
+
+    with open("/teamspace/studios/this_studio/image-segmentation-cv/Dataset/val.pkl", "rb") as f:
+        val_dataset = pkl.load(f)
+
+    with open("/teamspace/studios/this_studio/image-segmentation-cv/Dataset/test.pkl", "rb") as f:
+        test_dataset = pkl.load(f)
+    
+    train_loader, val_loader = get_loaders(
+        train_dataset,
+        val_dataset,
+        num_workers=NUM_WORKERS,
+        batch_size=BATCH_SIZE,
+    ) 
+    
+    check_accuracy(val_loader, model, device=DEVICE)
+
+
+if __name__ == "__main__":
+    main()
