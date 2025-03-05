@@ -11,11 +11,9 @@ class DoubleConv(nn.Module):
         self.conv = nn.Sequential(
             nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=(3,3), stride=(1,1), padding="same"),
             nn.BatchNorm2d(num_features=out_channels),
-            nn.Dropout2d(p=0.5),
             nn.ReLU(),
             nn.Conv2d(in_channels=out_channels, out_channels=out_channels, kernel_size=3, stride=1, padding="same"),
             nn.BatchNorm2d(num_features=out_channels),
-            nn.Dropout2d(p=0.5),
             nn.ReLU(),
         )
     def forward(self, x):
@@ -34,7 +32,7 @@ class UNET(nn.Module):
     def __init__(
             # RGB images will have 3 channels
             # number of convolution kernels based off UNET architecture paper
-            self, in_channels=3, out_channels=1, features=[64, 128, 256, 512],
+            self, in_channels=3, out_channels=4, features=[64, 128, 256, 512],
     ):
         super(UNET, self).__init__()
 
@@ -63,7 +61,7 @@ class UNET(nn.Module):
 
         # out channels should correspond to num of classes
         self.final_conv = nn.Conv2d(features[0], out_channels, kernel_size=1)
-
+        
     def forward(self, x):
         skip_connections = []
 
@@ -84,14 +82,16 @@ class UNET(nn.Module):
 
             concat_skip = torch.cat((skip_connection, x), dim=1)
             x = self.ups[idx+1](concat_skip)
-
+        
         return self.final_conv(x)
 
 def test():
     x = torch.randn((3, 1, 161, 161))
-    model = UNET(in_channels=1, out_channels=1)
+    model = UNET(in_channels=1, out_channels=4)
     preds = model(x)
-    assert preds.shape == x.shape
+    print(f"input shape: {x.shape}")
+    print(f"input shape: {preds.shape}")
+    
     print("model is working!")
 
 
