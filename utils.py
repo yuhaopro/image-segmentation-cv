@@ -43,7 +43,7 @@ def get_loaders(
     return train_loader, val_loader
 def compute_iou(preds, targets):
     """
-    Compute IoU for each class.
+    Compute IoU for a class.
     
     Args:
         preds (torch.Tensor): Predicted class indices [batch_size, height, width].
@@ -62,6 +62,11 @@ def compute_iou(preds, targets):
     else:
         return (intersection / union).item()  # Compute IoU
 
+def compute_accuracy(preds, targets):
+    num_correct = (preds == targets).sum()
+    num_pixels = torch.numel(preds)
+
+    return num_correct / num_pixels
 
 def check_accuracy(loader, model, device="cuda"):
   
@@ -71,6 +76,8 @@ def check_accuracy(loader, model, device="cuda"):
         dog_dice_score = 0
         cat_iou_score = 0
         dog_iou_score = 0
+        cat_accuracy_score = 0
+        dog_accuracy_score = 0
         for x, y in loader:
             x = x.to(device)
             y = y.to(device).unsqueeze(1) # because mask does not have channel dimension, so need to add
@@ -84,24 +91,26 @@ def check_accuracy(loader, model, device="cuda"):
             actual_cat_mask = (y == 1).float()
             cat_dice_score += compute_dice_coefficient(pred_cat_mask, actual_cat_mask)
             cat_iou_score += compute_iou(pred_cat_mask, actual_cat_mask)
+            cat_accuracy_score += compute_accuracy(pred_cat_mask, actual_cat_mask)
             # dog
             pred_dog_mask = (pred_classes == 2).float()
             actual_dog_mask = (y == 2).float()
             dog_dice_score += compute_dice_coefficient(pred_dog_mask, actual_dog_mask)
             dog_iou_score += compute_iou(pred_cat_mask, actual_cat_mask)
+            dog_accuracy_score += compute_accuracy(pred_dog_mask, actual_dog_mask)
     
+
     print(f"Cat IOU Score: {cat_iou_score/len(loader)}")
     print(f"Dog IOU Score: {dog_iou_score/len(loader)}")
     print(f"Cat Dice Score: {cat_dice_score/len(loader)}")
     print(f"Dog Dice Score: {cat_dice_score/len(loader)}")
+    print(f"Cat Accuracy Score: {cat_accuracy_score/len(loader)}")
+    print(f"Dog Accuracy Score: {dog_accuracy_score/len(loader)}")
+    
     model.train()
 
 def compute_dice_coefficient(preds, mask):
-    num_correct = 0
-    num_pixels = 0
     dice_score = 0
-    num_correct += (preds == 1).sum()
-    num_pixels += torch.numel(preds)
     dice_score += (2 * (preds * mask).sum()) / (
                 (preds + mask).sum() + 1e-8)
     return dice_score
