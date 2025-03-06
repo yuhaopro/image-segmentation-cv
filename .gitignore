@@ -6,4 +6,4 @@ pytorch_dataset.py
 processed_dataset/
 .idea
 __pycache__
-.pth.tar
+*.pth.*
