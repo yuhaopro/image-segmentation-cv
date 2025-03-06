@@ -4,6 +4,13 @@ from torch.utils.data import Dataset
 import numpy as np
 from PIL import Image
 import torch
+import albumentations as A
+import random
+
+random.seed(42)
+
+IMAGE_HEIGHT = 256
+IMAGE_WIDTH = 256
 # create proper class labels
 class_to_color = {
     0: 0,    # Background
@@ -31,24 +38,20 @@ def convert_color_to_class(color_mask):
         placeholder[color_mask == color_idx] = _class
     return placeholder
 
-def add_class_dimension(mask):
-    # assuming mask is H*W
-    mask_by_class_list = []
-    for pet_class in sorted(color_to_class.values()):
-        temp = (mask == pet_class).float()
-        mask_by_class_list.append(temp)
-    output = torch.stack(mask_by_class_list)
-    return output
 
 def remove_class_dimension(mask):
     class_indices = torch.argmax(mask, dim=0)
     return class_indices
-        
-def default_transform(image=None, mask=None):
-    return {"image": image, "mask": mask}
+
+default = A.Compose([
+    # A.Resize(height=IMAGE_HEIGHT, width=IMAGE_WIDTH),
+    A.CenterCrop(height=IMAGE_HEIGHT, width=IMAGE_WIDTH, pad_if_needed=True),
+    A.Normalize(), # does not affect mask
+    A.ToTensorV2(transpose_mask=True),           
+], strict=True)
 
 class PetDataset(Dataset):
-    def __init__(self, image_dir, mask_dir, valid_masks, transform = default_transform):
+    def __init__(self, image_dir, mask_dir, valid_masks, transform = default):
         self.image_dir = image_dir
         self.mask_dir = mask_dir
         self.transform = transform
