@@ -106,7 +106,7 @@ def check_accuracy(loader, model, device="cuda"):
     print(f"Dog Dice Score: {cat_dice_score/len(loader)}")
     print(f"Cat Accuracy Score: {cat_accuracy_score/len(loader)}")
     print(f"Dog Accuracy Score: {dog_accuracy_score/len(loader)}")
-    
+
     model.train()
 
 def compute_dice_coefficient(preds, mask):
@@ -122,14 +122,20 @@ def save_predictions_as_imgs(
 ):
     model.eval()
     for idx, (x, y) in enumerate(loader):
-        x = x.to(device=device)
-        with torch.no_grad():
-            preds = torch.sigmoid(model(x))
-            preds = (preds > 0.5).float()
+        x = x.to(device)
+        y = y.to(device).unsqueeze(1) # because mask does not have channel dimension, so need to add
+        output = model(x)
+        # print(f"output shape: {output.size()}")
+        probabilities = F.softmax(output, dim=1) # Shape [16,3,128,128]
+        preds = torch.argmax(probabilities, dim=1) # shape [16,1,128,128]
+
+        # predicted mask
         torchvision.utils.save_image(
             preds, f"{folder}/pred_{idx}.png"
         )
-        torchvision.utils.save_image(y.unsqueeze(1), f"{folder}{idx}.png")
+
+        # target mask
+        torchvision.utils.save_image(y, f"{folder}{idx}.png")
 
     model.train()
 
