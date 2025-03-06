@@ -23,7 +23,7 @@ color_to_class = {
     0: 0,    # Background
     38: 1,   # Cat
     75: 2,   # Dog
-    255: 3   # Boundary
+    255: 0   # Boundary
 }
 
 def convert_class_to_color(class_mask):
@@ -73,3 +73,4 @@ class PetDataset(Dataset):
         mask = convert_color_to_class(mask)
         # mask = add_class_dimension(mask)
         return image, mask
+    
