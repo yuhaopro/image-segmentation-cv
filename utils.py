@@ -43,26 +43,42 @@ def get_loaders(
     return train_loader, val_loader
 
 def check_accuracy(loader, model, device="cuda"):
-    num_correct = 0
-    num_pixels = 0
-    dice_score = 0
+  
     model.eval()
-    dice_score_cat = 0.0
-    dice_score_dog = 0.0
     with torch.no_grad():
+        cat_dice_score = 0
+        dog_dice_score = 0
         for x, y in loader:
             x = x.to(device)
             y = y.to(device).unsqueeze(1) # because mask does not have channel dimension, so need to add
             output = model(x)
             # print(f"output shape: {output.size()}")
             probabilities = F.softmax(output, dim=1) # Shape [16,3,128,128]
-            # print(f"probabilities shape: {probabilities.size()}")
-            pred_classes = torch.argmax(probabilities, dim=1)
-            # print(f"pred_classes: {pred_classes.size()}")
-            # print(f"pred_classes_unique: {pred_classes.unique()}")
+            pred_classes = torch.argmax(probabilities, dim=1) # shape [16,1,128,128]
             
-
+            # cat
+            pred_cat_mask = (pred_classes == 1).float()
+            actual_cat_mask = (y == 1).float()
+            cat_dice_score += compute_dice_coefficient(pred_cat_mask, actual_cat_mask)
+            # dog
+            pred_dog_mask = (pred_classes == 2).float()
+            actual_dog_mask = (y == 2).float()
+            dog_dice_score += compute_dice_coefficient(pred_dog_mask, actual_dog_mask)
+            
+    print(f"Cat Dice Score: {cat_dice_score/len(loader)}")
+    print(f"Dog Dice Score: {cat_dice_score/len(loader)}")
     model.train()
+
+def compute_dice_coefficient(preds, mask):
+    num_correct = 0
+    num_pixels = 0
+    dice_score = 0
+    num_correct += (preds == 1).sum()
+    num_pixels += torch.numel(preds)
+    dice_score += (2 * (preds * mask).sum()) / (
+                (preds + mask).sum() + 1e-8)
+    return dice_score
+
 
 # to edit the preds 
 def save_predictions_as_imgs(
