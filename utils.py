@@ -41,6 +41,27 @@ def get_loaders(
     )
 
     return train_loader, val_loader
+def compute_iou(preds, targets):
+    """
+    Compute IoU for each class.
+    
+    Args:
+        preds (torch.Tensor): Predicted class indices [batch_size, height, width].
+        targets (torch.Tensor): Ground truth class indices [batch_size, height, width].
+        pet_class (int): 0: background, 1: cat, 2: dog, 3: border.
+    
+    Returns:
+        iou (torch.Tensor): IoU for each class [num_classes].
+    """
+
+    intersection = (preds & targets).sum().float()  # Intersection
+    union = (preds | targets).sum().float()  # Union
+
+    if union == 0:  # Avoid division by zero
+        union = 1e-8  
+    else:
+        return (intersection / union).item()  # Compute IoU
+
 
 def check_accuracy(loader, model, device="cuda"):
   
@@ -48,6 +69,8 @@ def check_accuracy(loader, model, device="cuda"):
     with torch.no_grad():
         cat_dice_score = 0
         dog_dice_score = 0
+        cat_iou_score = 0
+        dog_iou_score = 0
         for x, y in loader:
             x = x.to(device)
             y = y.to(device).unsqueeze(1) # because mask does not have channel dimension, so need to add
@@ -55,16 +78,20 @@ def check_accuracy(loader, model, device="cuda"):
             # print(f"output shape: {output.size()}")
             probabilities = F.softmax(output, dim=1) # Shape [16,3,128,128]
             pred_classes = torch.argmax(probabilities, dim=1) # shape [16,1,128,128]
-            
+
             # cat
             pred_cat_mask = (pred_classes == 1).float()
             actual_cat_mask = (y == 1).float()
             cat_dice_score += compute_dice_coefficient(pred_cat_mask, actual_cat_mask)
+            cat_iou_score += compute_iou(pred_cat_mask, actual_cat_mask)
             # dog
             pred_dog_mask = (pred_classes == 2).float()
             actual_dog_mask = (y == 2).float()
             dog_dice_score += compute_dice_coefficient(pred_dog_mask, actual_dog_mask)
-            
+            dog_iou_score += compute_iou(pred_cat_mask, actual_cat_mask)
+    
+    print(f"Cat IOU Score: {cat_iou_score/len(loader)}")
+    print(f"Dog IOU Score: {dog_iou_score/len(loader)}")
     print(f"Cat Dice Score: {cat_dice_score/len(loader)}")
     print(f"Dog Dice Score: {cat_dice_score/len(loader)}")
     model.train()
