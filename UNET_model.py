@@ -32,7 +32,7 @@ class UNET(nn.Module):
     def __init__(
             # RGB images will have 3 channels
             # number of convolution kernels based off UNET architecture paper
-            self, in_channels=3, out_channels=4, features=[64, 128, 256, 512],
+            self, in_channels=3, out_channels=3, features=[64, 128, 256, 512],
     ):
         super(UNET, self).__init__()
 
