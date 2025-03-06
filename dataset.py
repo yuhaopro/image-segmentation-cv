@@ -44,11 +44,11 @@ def remove_class_dimension(mask):
     return class_indices
 
 default = A.Compose([
-    # A.Resize(height=IMAGE_HEIGHT, width=IMAGE_WIDTH),
-    A.CenterCrop(height=IMAGE_HEIGHT, width=IMAGE_WIDTH, pad_if_needed=True),
+    A.Resize(height=IMAGE_HEIGHT, width=IMAGE_WIDTH),
+    # A.CenterCrop(height=IMAGE_HEIGHT, width=IMAGE_WIDTH, pad_if_needed=True),
     A.Normalize(), # does not affect mask
     A.ToTensorV2(transpose_mask=True),           
-], strict=True)
+], seed=137, strict=True)
 
 class PetDataset(Dataset):
     def __init__(self, image_dir, mask_dir, valid_masks, transform = default):

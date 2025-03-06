@@ -69,15 +69,14 @@ def compute_accuracy(preds, targets):
     return num_correct / num_pixels
 
 def check_accuracy(loader, model, device="cuda"):
-  
+    cat_dice_score = 0
+    dog_dice_score = 0
+    cat_iou_score = 0
+    dog_iou_score = 0
+    cat_accuracy_score = 0
+    dog_accuracy_score = 0  
     model.eval()
     with torch.no_grad():
-        cat_dice_score = 0
-        dog_dice_score = 0
-        cat_iou_score = 0
-        dog_iou_score = 0
-        cat_accuracy_score = 0
-        dog_accuracy_score = 0
         for x, y in loader:
             x = x.to(device)
             y = y.to(device).unsqueeze(1) # because mask does not have channel dimension, so need to add
