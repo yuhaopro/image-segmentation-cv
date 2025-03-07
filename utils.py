@@ -71,10 +71,13 @@ def compute_accuracy(preds, targets):
 def check_accuracy(loader, model, device="cuda"):
     cat_dice_score = 0
     dog_dice_score = 0
+    bg_dice_score = 0
     cat_iou_score = 0
     dog_iou_score = 0
+    bg_iou_score = 0
     cat_accuracy_score = 0
     dog_accuracy_score = 0  
+    bg_accuracy_score = 0
     model.eval()
     with torch.no_grad():
         for x, y in loader:
@@ -84,7 +87,12 @@ def check_accuracy(loader, model, device="cuda"):
             # print(f"output shape: {output.size()}")
             probabilities = F.softmax(output, dim=1) # Shape [16,3,128,128]
             pred_classes = torch.argmax(probabilities, dim=1) # shape [16,1,128,128]
-
+            # background
+            pred_bg_mask = (pred_classes == 0).int()
+            actual_bg_mask = (y == 0).int()
+            bg_dice_score += compute_dice_coefficient(pred_bg_mask, actual_bg_mask)
+            bg_iou_score += compute_iou(pred_bg_mask, actual_bg_mask)
+            bg_accuracy_score += compute_accuracy(pred_bg_mask, actual_bg_mask)
             # cat
             pred_cat_mask = (pred_classes == 1).int()
             actual_cat_mask = (y == 1).int()
@@ -101,10 +109,14 @@ def check_accuracy(loader, model, device="cuda"):
 
     print(f"Cat IOU Score: {cat_iou_score/len(loader)}")
     print(f"Dog IOU Score: {dog_iou_score/len(loader)}")
+    print(f"Background IOU Score: {bg_iou_score/len(loader)}")
     print(f"Cat Dice Score: {cat_dice_score/len(loader)}")
     print(f"Dog Dice Score: {cat_dice_score/len(loader)}")
+    print(f"Background IOU Score: {bg_dice_score/len(loader)}")
     print(f"Cat Accuracy Score: {cat_accuracy_score/len(loader)}")
     print(f"Dog Accuracy Score: {dog_accuracy_score/len(loader)}")
+    print(f"Background Accuracy Score: {bg_accuracy_score/len(loader)}")
+
 
     model.train()
 
