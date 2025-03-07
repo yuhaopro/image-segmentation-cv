@@ -106,9 +106,10 @@ def main():
         utils.check_accuracy(val_loader, model, device=DEVICE)
 
         # print some examples to a folder
-        utils.save_predictions_as_imgs(
-            val_loader, model, folder="saved_images", device=DEVICE
-        )
+        # TODO: currently not working -> result type Float can't be cast to the desired output type Long
+        # utils.save_predictions_as_imgs(
+        #     val_loader, model, folder="saved_images", device=DEVICE
+        # )
 
 if __name__ == "__main__":
     main()
