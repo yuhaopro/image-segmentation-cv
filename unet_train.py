@@ -22,8 +22,8 @@ TEST_MASK_DIR = f"{os.getcwd()}/Dataset/Test/label"
 BATCH_SIZE = 16
 PIN_MEMORY = True
 NUM_WORKERS = 4
-LEARNING_RATE = 1e-4
-LOAD_MODEL = False
+LEARNING_RATE = 1e-5
+LOAD_MODEL = True
 NUM_EPOCHS = 10
 DEVICE =  torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
