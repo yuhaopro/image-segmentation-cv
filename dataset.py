@@ -11,14 +11,24 @@ random.seed(42)
 
 IMAGE_HEIGHT = 256
 IMAGE_WIDTH = 256
+
+"""
+This file contains the PetDataset class, augmentation pipelines, and utility functions for datasets. 
+"""
+
+
 # create proper class labels
 class_to_color = {
     0: 0,    # Background
     1: 38,   # Cat
     2: 75,   # Dog
-    3: 255   # Boundary
+    3: 0   # Boundary
 }
 
+"""
+Conversion of mask pixel to class labels.
+Boundary is counted as background.
+"""
 color_to_class = {
     0: 0,    # Background
     38: 1,   # Cat
@@ -43,19 +53,39 @@ def remove_class_dimension(mask):
     class_indices = torch.argmax(mask, dim=0)
     return class_indices
 
-default = A.Compose([
+default_transform = A.Compose([
     A.Resize(height=IMAGE_HEIGHT, width=IMAGE_WIDTH),
     # A.CenterCrop(height=IMAGE_HEIGHT, width=IMAGE_WIDTH, pad_if_needed=True),
     A.Normalize(), # does not affect mask
     A.ToTensorV2(transpose_mask=True),           
 ], seed=137, strict=True)
 
+augmented_transform = A.Compose([
+    A.Resize(height=IMAGE_HEIGHT, width=IMAGE_WIDTH),
+    # A.CenterCrop(height=IMAGE_HEIGHT, width=IMAGE_WIDTH, pad_if_needed=True),
+    A.HorizontalFlip(p=0.5),
+    A.VerticalFlip(p=0.5),               
+    A.Rotate(limit=(-40,40)),
+    A.ElasticTransform(p=0.5),
+    A.ColorJitter(), 
+    A.Normalize(), # does not affect mask
+    A.ToTensorV2(transpose_mask=True),           
+], seed=137, strict=True)
+
 class PetDataset(Dataset):
-    def __init__(self, image_dir, mask_dir, valid_masks, transform = default):
-        self.image_dir = image_dir
-        self.mask_dir = mask_dir
+    """
+    PetDataset to be created during data loading.
+
+    image_dir: image directory containing all colored images
+    mask_dir: mask directory containing all target masks
+    pet_class: creates a dataset with either "cats" or "dogs" only
+    transform: transformation on the images and mask, default normalizes image and convert to tensor
+    """
+    def __init__(self, image_dir, mask_dir, pet_class = None, transform = default_transform):
+        self.image_dir = f"{image_dir}/{pet_class}" if pet_class != None else image_dir
+        self.mask_dir = f"{mask_dir}/{pet_class}" if pet_class != None else mask_dir
         self.transform = transform
-        self.images = valid_masks
+        self.images = os.listdir(self.mask_dir)
 
     def __len__(self):
         return len(self.images)
