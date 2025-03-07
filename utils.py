@@ -111,7 +111,7 @@ def check_accuracy(loader, model, device="cuda"):
     print(f"Dog IOU Score: {dog_iou_score/len(loader)}")
     print(f"Background IOU Score: {bg_iou_score/len(loader)}")
     print(f"Cat Dice Score: {cat_dice_score/len(loader)}")
-    print(f"Dog Dice Score: {cat_dice_score/len(loader)}")
+    print(f"Dog Dice Score: {dog_dice_score/len(loader)}")
     print(f"Background IOU Score: {bg_dice_score/len(loader)}")
     print(f"Cat Accuracy Score: {cat_accuracy_score/len(loader)}")
     print(f"Dog Accuracy Score: {dog_accuracy_score/len(loader)}")
