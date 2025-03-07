@@ -2,7 +2,7 @@ import torch
 import torchvision
 from torch.utils.data import DataLoader
 import torch.nn.functional as F
-from UNET_model import UNET
+from unet_model import UNET
 import torch.nn as nn
 import torch.optim as optim
 import pickle as pkl
@@ -37,7 +37,7 @@ def get_loaders(
         batch_size=batch_size,
         num_workers=num_workers,
         pin_memory=pin_memory,
-        shuffle=False,
+        shuffle=True,
     )
 
     return train_loader, val_loader
@@ -86,16 +86,16 @@ def check_accuracy(loader, model, device="cuda"):
             pred_classes = torch.argmax(probabilities, dim=1) # shape [16,1,128,128]
 
             # cat
-            pred_cat_mask = (pred_classes == 1).float()
-            actual_cat_mask = (y == 1).float()
+            pred_cat_mask = (pred_classes == 1).int()
+            actual_cat_mask = (y == 1).int()
             cat_dice_score += compute_dice_coefficient(pred_cat_mask, actual_cat_mask)
             cat_iou_score += compute_iou(pred_cat_mask, actual_cat_mask)
             cat_accuracy_score += compute_accuracy(pred_cat_mask, actual_cat_mask)
             # dog
-            pred_dog_mask = (pred_classes == 2).float()
-            actual_dog_mask = (y == 2).float()
+            pred_dog_mask = (pred_classes == 2).int()
+            actual_dog_mask = (y == 2).int()
             dog_dice_score += compute_dice_coefficient(pred_dog_mask, actual_dog_mask)
-            dog_iou_score += compute_iou(pred_cat_mask, actual_cat_mask)
+            dog_iou_score += compute_iou(pred_dog_mask, actual_dog_mask)
             dog_accuracy_score += compute_accuracy(pred_dog_mask, actual_dog_mask)
     
 
