@@ -42,39 +42,22 @@ def get_loaders(
     )
 
     return train_loader, val_loader
-def compute_iou(preds, targets):
-    """
-    Compute IoU for a class.
-    
-    Args:
-        preds (torch.Tensor): Predicted class indices [batch_size, height, width].
-        targets (torch.Tensor): Ground truth class indices [batch_size, height, width].
-        pet_class (int): 0: background, 1: cat, 2: dog, 3: border.
-    
-    Returns:
-        iou (torch.Tensor): IoU for each class [num_classes].
-    """
+def compute_iou(preds, targets, eps=1e-8):
+    intersection = (preds * targets).sum()
+    union = preds.sum() + targets.sum() - intersection
+    iou = intersection / (union + eps)
+    return iou.item()
 
-    intersection = (preds & targets).sum().float()  # Intersection
-    union = (preds | targets).sum().float()  # Union
-
-    if union == 0:  # Avoid division by zero
-        union = 1e-8  
-    else:
-        return (intersection / union).item()  # Compute IoU
-
-def compute_accuracy(preds, targets, pet_class):
-    # pet class 0: bg, 1: cat, 2: dog
+def compute_accuracy(preds, targets):
     num_correct = (preds == targets).sum()
-    num_pixels = (preds == pet_class).sum()
+    num_pixels = torch.numel(preds)
 
     return num_correct / num_pixels
 
-def compute_dice_coefficient(preds, mask):
-    dice_score = 0
-    dice_score += (2 * (preds * mask).sum()) / (
-                (preds + mask).sum() + 1e-8)
-    return dice_score
+def compute_dice_coefficient(preds, targets, eps=1e-8):
+    intersection = (preds * targets).sum()
+    dice = (2 * intersection) / (preds.sum() + targets.sum() + eps)
+    return dice.item()
 
 def check_accuracy(loader, model, device="cuda"):
     cat_dice_score = []
@@ -96,23 +79,23 @@ def check_accuracy(loader, model, device="cuda"):
             probabilities = F.softmax(output, dim=1) # Shape [16,3,128,128]
             pred_classes = torch.argmax(probabilities, dim=1) # shape [16,1,128,128]
             # background
-            pred_bg_mask = (pred_classes == 0).int()
-            actual_bg_mask = (y == 0).int()
+            pred_bg_mask = (pred_classes == 0).float()
+            actual_bg_mask = (y == 0).float()
             bg_dice_score.append(compute_dice_coefficient(pred_bg_mask, actual_bg_mask))
             bg_iou_score.append(compute_iou(pred_bg_mask, actual_bg_mask))
-            bg_accuracy_score.append(compute_accuracy(pred_bg_mask, actual_bg_mask, 0))
+            bg_accuracy_score.append(compute_accuracy(pred_bg_mask, actual_bg_mask))
             # cat
-            pred_cat_mask = (pred_classes == 1).int()
-            actual_cat_mask = (y == 1).int()
+            pred_cat_mask = (pred_classes == 1).float()
+            actual_cat_mask = (y == 1).float()
             cat_dice_score.append(compute_dice_coefficient(pred_cat_mask, actual_cat_mask))
             cat_iou_score.append(compute_iou(pred_cat_mask, actual_cat_mask))
-            cat_accuracy_score.append(compute_accuracy(pred_cat_mask, actual_cat_mask, 1))
+            cat_accuracy_score.append(compute_accuracy(pred_cat_mask, actual_cat_mask))
             # dog
-            pred_dog_mask = (pred_classes == 2).int()
-            actual_dog_mask = (y == 2).int()
+            pred_dog_mask = (pred_classes == 2).float()
+            actual_dog_mask = (y == 2).float()
             dog_dice_score.append(compute_dice_coefficient(pred_dog_mask, actual_dog_mask))
             dog_iou_score.append(compute_iou(pred_dog_mask, actual_dog_mask))
-            dog_accuracy_score.append(compute_accuracy(pred_dog_mask, actual_dog_mask, 2))
+            dog_accuracy_score.append(compute_accuracy(pred_dog_mask, actual_dog_mask))
     
 
     print(f"Cat IOU Score: {sum(cat_iou_score)/len(loader)}")
