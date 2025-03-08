@@ -71,6 +71,8 @@ class UNET(nn.Module):
             x = self.pool(x)
 
         x = self.bottleneck(x)
+
+        # reverse the skip connections
         skip_connections = skip_connections[::-1]
 
         for idx in range(0, len(self.ups), 2):

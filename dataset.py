@@ -56,7 +56,6 @@ def remove_class_dimension(mask):
 default_transform = A.Compose([
     A.Resize(height=IMAGE_HEIGHT, width=IMAGE_WIDTH),
     # A.CenterCrop(height=IMAGE_HEIGHT, width=IMAGE_WIDTH, pad_if_needed=True),
-    A.Normalize(), # does not affect mask
     A.ToTensorV2(transpose_mask=True),           
 ], seed=137, strict=True)
 
@@ -68,9 +67,9 @@ augmented_transform = A.Compose([
     A.Rotate(limit=(-40,40)),
     A.ElasticTransform(p=0.5),
     A.ColorJitter(), 
-    A.Normalize(), # does not affect mask
     A.ToTensorV2(transpose_mask=True),           
 ], seed=137, strict=True)
+
 
 class PetDataset(Dataset):
     """
