@@ -25,8 +25,8 @@ NUM_WORKERS = 4
 LEARNING_RATE = 1e-4
 LOAD_MODEL = False
 NUM_EPOCHS = 10
+DEVICE_NAME = "cuda"
 DEVICE =  torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
 
 def train(loader, model, optimizer, loss_fn, scaler):
     loop = tqdm(loader)
@@ -37,7 +37,7 @@ def train(loader, model, optimizer, loss_fn, scaler):
         masks = masks.long().to(device=DEVICE) # batch, class, height, width
 
         # forward
-        with torch.amp.autocast(device_type="cuda"): # convolutions are much faster in lower_precision_fp
+        with torch.autocast(device_type=DEVICE_NAME): # convolutions are much faster in lower_precision_fp
             predictions = model(images)
             loss = loss_fn(predictions, masks)
 
@@ -89,8 +89,8 @@ def main():
     if LOAD_MODEL:
         utils.load_checkpoint(torch.load("CLIP_checkpoint.pth.tar"), model)
 
-    utils.check_accuracy(val_loader, model, device=DEVICE)
-    scaler = torch.amp.GradScaler()
+    utils.check_accuracy(val_loader, model, device="cuda")
+    scaler = torch.GradScaler()
 
     for epoch in range(NUM_EPOCHS):
         train(train_loader, model, optimizer, loss_fn, scaler)
@@ -103,7 +103,7 @@ def main():
         utils.save_checkpoint(checkpoint, filename="CLIP_checkpoint.pth.tar")
 
         # check accuracy
-        utils.check_accuracy(val_loader, model, device=DEVICE)
+        utils.check_accuracy(val_loader, model, device=DEVICE_NAME)
 
         # print some examples to a folder
         # TODO: currently not working -> result type Float can't be cast to the desired output type Long
