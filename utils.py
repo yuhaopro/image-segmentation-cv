@@ -63,9 +63,10 @@ def compute_iou(preds, targets):
     else:
         return (intersection / union).item()  # Compute IoU
 
-def compute_accuracy(preds, targets):
+def compute_accuracy(preds, targets, pet_class):
+    # pet class 0: bg, 1: cat, 2: dog
     num_correct = (preds == targets).sum()
-    num_pixels = torch.numel(preds)
+    num_pixels = (preds == pet_class).sum()
 
     return num_correct / num_pixels
 
@@ -99,19 +100,19 @@ def check_accuracy(loader, model, device="cuda"):
             actual_bg_mask = (y == 0).int()
             bg_dice_score.append(compute_dice_coefficient(pred_bg_mask, actual_bg_mask))
             bg_iou_score.append(compute_iou(pred_bg_mask, actual_bg_mask))
-            bg_accuracy_score.append(compute_accuracy(pred_bg_mask, actual_bg_mask))
+            bg_accuracy_score.append(compute_accuracy(pred_bg_mask, actual_bg_mask, 0))
             # cat
             pred_cat_mask = (pred_classes == 1).int()
             actual_cat_mask = (y == 1).int()
             cat_dice_score.append(compute_dice_coefficient(pred_cat_mask, actual_cat_mask))
             cat_iou_score.append(compute_iou(pred_cat_mask, actual_cat_mask))
-            cat_accuracy_score.append(compute_accuracy(pred_cat_mask, actual_cat_mask))
+            cat_accuracy_score.append(compute_accuracy(pred_cat_mask, actual_cat_mask, 1))
             # dog
             pred_dog_mask = (pred_classes == 2).int()
             actual_dog_mask = (y == 2).int()
             dog_dice_score.append(compute_dice_coefficient(pred_dog_mask, actual_dog_mask))
             dog_iou_score.append(compute_iou(pred_dog_mask, actual_dog_mask))
-            dog_accuracy_score.append(compute_accuracy(pred_dog_mask, actual_dog_mask))
+            dog_accuracy_score.append(compute_accuracy(pred_dog_mask, actual_dog_mask, 2))
     
 
     print(f"Cat IOU Score: {sum(cat_iou_score)/len(loader)}")
