@@ -19,12 +19,12 @@ TRAIN_IMAGE_DIR = f"{os.getcwd()}/Dataset/TrainVal/color"
 TRAIN_MASK_DIR = f"{os.getcwd()}/Dataset/TrainVal/label"
 TEST_IMAGE_DIR = f"{os.getcwd()}/Dataset/Test/color"
 TEST_MASK_DIR = f"{os.getcwd()}/Dataset/Test/label"
-BATCH_SIZE = 16
+BATCH_SIZE = 64
 PIN_MEMORY = True
 NUM_WORKERS = 4
-LEARNING_RATE = 1e-4
+LEARNING_RATE = 1e-5
 LOAD_MODEL = False
-NUM_EPOCHS = 10
+NUM_EPOCHS = 20
 DEVICE_NAME = "cuda"
 DEVICE =  torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
