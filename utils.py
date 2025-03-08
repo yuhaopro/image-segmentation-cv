@@ -103,7 +103,7 @@ def check_accuracy(loader, model, device="cuda"):
     print(f"Background IOU Score: {sum(bg_iou_score)/len(loader)}")
     print(f"Cat Dice Score: {sum(cat_dice_score)/len(loader)}")
     print(f"Dog Dice Score: {sum(cat_dice_score)/len(loader)}")
-    print(f"Background IOU Score: {sum(bg_dice_score)/len(loader)}")
+    print(f"Background Dice Score: {sum(bg_dice_score)/len(loader)}")
     print(f"Cat Accuracy Score: {sum(cat_accuracy_score)/len(loader)}")
     print(f"Dog Accuracy Score: {sum(dog_accuracy_score)/len(loader)}")
     print(f"Background Accuracy Score: {sum(bg_accuracy_score)/len(loader)}")
