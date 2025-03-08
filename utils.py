@@ -73,11 +73,19 @@ def check_accuracy(loader, model, device="cuda"):
     with torch.no_grad():
         for x, y in loader:
             x = x.to(device)
-            y = y.to(device).unsqueeze(1) # because mask does not have channel dimension, so need to add
+            # print(f"input shape: {x.size()}") # input shape: torch.Size([64, 3, 256, 256])
+
+            y = y.to(device).unsqueeze(1)
+            # print(f"target mask shape: {y.size()}")  # target mask shape: torch.Size([64, 1, 256, 256])
+
             output = model(x)
-            # print(f"output shape: {output.size()}")
-            probabilities = F.softmax(output, dim=1) # Shape [16,3,128,128]
-            pred_classes = torch.argmax(probabilities, dim=1) # shape [16,1,128,128]
+            # print(f"output shape: {output.size()}") # output shape: torch.Size([64, 3, 256, 256])
+            probabilities = F.softmax(output, dim=1) 
+            # print(f"probs shape: {probabilities.size()}") # probs shape: torch.Size([64, 3, 256, 256])
+
+            pred_classes = torch.argmax(probabilities, dim=1).unsqueeze(1) 
+            # print(f"pred argmax shape: {pred_classes.size()}") # pred argmax shape: torch.Size([64, 1, 256, 256])
+
             # background
             pred_bg_mask = (pred_classes == 0).float()
             actual_bg_mask = (y == 0).float()

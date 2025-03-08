@@ -25,7 +25,7 @@ NUM_WORKERS = 4
 LEARNING_RATE = 1e-5
 LOAD_MODEL = False
 NUM_EPOCHS = 20
-DEVICE_NAME = "cuda"
+DEVICE_NAME = "cpu"
 DEVICE =  torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def train(loader, model, optimizer, loss_fn, scaler):
@@ -89,7 +89,7 @@ def main():
     if LOAD_MODEL:
         utils.load_checkpoint(torch.load("CLIP_checkpoint.pth.tar"), model)
 
-    utils.check_accuracy(val_loader, model, device="cuda")
+    utils.check_accuracy(val_loader, model, device=DEVICE_NAME)
     scaler = torch.GradScaler()
 
     for epoch in range(NUM_EPOCHS):
