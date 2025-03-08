@@ -6,6 +6,7 @@ from unet_model import UNET
 import torch.nn as nn
 import torch.optim as optim
 import pickle as pkl
+import numpy as np
 
 def save_checkpoint(state, filename="my_checkpoint.pth.tar"):
     print("=> Saving checkpoint")
@@ -68,16 +69,22 @@ def compute_accuracy(preds, targets):
 
     return num_correct / num_pixels
 
+def compute_dice_coefficient(preds, mask):
+    dice_score = 0
+    dice_score += (2 * (preds * mask).sum()) / (
+                (preds + mask).sum() + 1e-8)
+    return dice_score
+
 def check_accuracy(loader, model, device="cuda"):
-    cat_dice_score = 0
-    dog_dice_score = 0
-    bg_dice_score = 0
-    cat_iou_score = 0
-    dog_iou_score = 0
-    bg_iou_score = 0
-    cat_accuracy_score = 0
-    dog_accuracy_score = 0  
-    bg_accuracy_score = 0
+    cat_dice_score = np.array([], dtype=np.float32)
+    dog_dice_score = np.array([], dtype=np.float32)
+    bg_dice_score = np.array([], dtype=np.float32)
+    cat_iou_score = np.array([], dtype=np.float32)
+    dog_iou_score = np.array([], dtype=np.float32)
+    bg_iou_score = np.array([], dtype=np.float32)
+    cat_accuracy_score = np.array([], dtype=np.float32)
+    dog_accuracy_score = np.array([], dtype=np.float32) 
+    bg_accuracy_score = np.array([], dtype=np.float32)
     model.eval()
     with torch.no_grad():
         for x, y in loader:
@@ -90,41 +97,52 @@ def check_accuracy(loader, model, device="cuda"):
             # background
             pred_bg_mask = (pred_classes == 0).int()
             actual_bg_mask = (y == 0).int()
-            bg_dice_score += compute_dice_coefficient(pred_bg_mask, actual_bg_mask)
-            bg_iou_score += compute_iou(pred_bg_mask, actual_bg_mask)
-            bg_accuracy_score += compute_accuracy(pred_bg_mask, actual_bg_mask)
+            bg_dice_score = np.append(bg_dice_score, compute_dice_coefficient(pred_bg_mask, actual_bg_mask))
+            bg_iou_score = np.append(bg_iou_score, compute_iou(pred_bg_mask, actual_bg_mask))
+            bg_accuracy_score = np.append(bg_accuracy_score, compute_accuracy(pred_bg_mask, actual_bg_mask))
             # cat
             pred_cat_mask = (pred_classes == 1).int()
             actual_cat_mask = (y == 1).int()
-            cat_dice_score += compute_dice_coefficient(pred_cat_mask, actual_cat_mask)
-            cat_iou_score += compute_iou(pred_cat_mask, actual_cat_mask)
-            cat_accuracy_score += compute_accuracy(pred_cat_mask, actual_cat_mask)
+            cat_dice_score = np.append(cat_dice_score, compute_dice_coefficient(pred_cat_mask, actual_cat_mask))
+            cat_iou_score = np.append(cat_iou_score, compute_iou(pred_cat_mask, actual_cat_mask))
+            cat_accuracy_score = np.append(cat_accuracy_score, compute_accuracy(pred_cat_mask, actual_cat_mask))
             # dog
             pred_dog_mask = (pred_classes == 2).int()
             actual_dog_mask = (y == 2).int()
-            dog_dice_score += compute_dice_coefficient(pred_dog_mask, actual_dog_mask)
-            dog_iou_score += compute_iou(pred_dog_mask, actual_dog_mask)
-            dog_accuracy_score += compute_accuracy(pred_dog_mask, actual_dog_mask)
+            dog_dice_score = np.append(dog_dice_score, compute_dice_coefficient(pred_dog_mask, actual_dog_mask))
+            dog_iou_score = np.append(dog_iou_score, compute_iou(pred_dog_mask, actual_dog_mask))
+            dog_accuracy_score = np.append(dog_accuracy_score, compute_accuracy(pred_dog_mask, actual_dog_mask))
     
 
-    print(f"Cat IOU Score: {cat_iou_score/len(loader)}")
-    print(f"Dog IOU Score: {dog_iou_score/len(loader)}")
-    print(f"Background IOU Score: {bg_iou_score/len(loader)}")
-    print(f"Cat Dice Score: {cat_dice_score/len(loader)}")
-    print(f"Dog Dice Score: {dog_dice_score/len(loader)}")
-    print(f"Background IOU Score: {bg_dice_score/len(loader)}")
-    print(f"Cat Accuracy Score: {cat_accuracy_score/len(loader)}")
-    print(f"Dog Accuracy Score: {dog_accuracy_score/len(loader)}")
-    print(f"Background Accuracy Score: {bg_accuracy_score/len(loader)}")
+    print(f"Cat IOU Score: {cat_iou_score.sum()/len(loader)}")
+    print(f"Dog IOU Score: {dog_iou_score.sum()/len(loader)}")
+    print(f"Background IOU Score: {bg_iou_score.sum()/len(loader)}")
+    print(f"Cat Dice Score: {cat_dice_score.sum()/len(loader)}")
+    print(f"Dog Dice Score: {cat_dice_score.sum()/len(loader)}")
+    print(f"Background IOU Score: {bg_dice_score.sum()/len(loader)}")
+    print(f"Cat Accuracy Score: {cat_accuracy_score.sum()/len(loader)}")
+    print(f"Dog Accuracy Score: {dog_accuracy_score.sum()/len(loader)}")
+    print(f"Background Accuracy Score: {bg_accuracy_score.sum()/len(loader)}")
+    
+    metric_dict = {
+        "cat_dice_score": cat_dice_score,
+        "dog_dice_score": dog_dice_score,
+        "bg_dice_score": bg_dice_score,
+        "cat_iou_score": cat_iou_score,
+        "dog_iou_score": dog_iou_score,
+        "bg_iou_score": bg_iou_score,
+        "cat_accuracy_score": cat_accuracy_score,
+        "dog_accuracy_score" : dog_accuracy_score,
+        "bg_accuracy_score": bg_accuracy_score
+    }
+
+
+    with open("metric_dict.pkl", "wb") as f:
+        pkl.dump(metric_dict, f)
 
 
     model.train()
 
-def compute_dice_coefficient(preds, mask):
-    dice_score = 0
-    dice_score += (2 * (preds * mask).sum()) / (
-                (preds + mask).sum() + 1e-8)
-    return dice_score
 
 
 # to edit the preds 
