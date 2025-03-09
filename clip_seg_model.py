@@ -6,6 +6,7 @@ from transformers import CLIPVisionModel, CLIPImageProcessor
 from torchvision.utils import save_image
 from PIL import Image
 
+
 class DoubleConv(nn.Module):
     def __init__(self, in_channels, out_channels):
         super(DoubleConv, self).__init__()

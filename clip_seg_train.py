@@ -3,22 +3,11 @@ from tqdm import tqdm
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import random_split, ConcatDataset
 import random
 from clip_seg_model import ClipSegmentation
-from dataset import PetDataset, augmented_transform
-from dataset_extraction import split_dataset
 import os
 
 random.seed(42)
-# TRAIN_IMAGE_DIR = "/teamspace/studios/this_studio/image-segmentation-cv/Dataset/TrainVal/color"
-# TRAIN_MASK_DIR = "/teamspace/studios/this_studio/image-segmentation-cv/Dataset/TrainVal/label"
-# TEST_IMAGE_DIR = "/teamspace/studios/this_studio/image-segmentation-cv/Dataset/Test/color"
-# TEST_MASK_DIR = "/teamspace/studios/this_studio/image-segmentation-cv/Dataset/Test/label"
-TRAIN_IMAGE_DIR = f"{os.getcwd()}/Dataset/TrainVal/color"
-TRAIN_MASK_DIR = f"{os.getcwd()}/Dataset/TrainVal/label"
-TEST_IMAGE_DIR = f"{os.getcwd()}/Dataset/Test/color"
-TEST_MASK_DIR = f"{os.getcwd()}/Dataset/Test/label"
 BATCH_SIZE = 64
 PIN_MEMORY = True
 NUM_WORKERS = 4
@@ -28,17 +17,22 @@ NUM_EPOCHS = 20
 DEVICE_NAME = "cpu"
 DEVICE =  torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+# train for each epoch
 def train(loader, model, optimizer, loss_fn, scaler):
     loop = tqdm(loader)
 
+    # total loss for this epoch
+    epoch_loss = 0
     for batch_idx, (images, masks) in enumerate(loop):
         # print(f"batch: {batch_idx} images: {images.size()} masks: {masks.size()}")
         images = images.to(device=DEVICE)
         masks = masks.long().to(device=DEVICE) # batch, class, height, width
-
+        print(f"masks shape: {masks.shape}")
         # forward
         with torch.autocast(device_type=DEVICE_NAME): # convolutions are much faster in lower_precision_fp
             predictions = model(images)
+            print(f"predictions shape: {masks.shape}")
+
             loss = loss_fn(predictions, masks)
 
         # backward
@@ -49,34 +43,16 @@ def train(loader, model, optimizer, loss_fn, scaler):
 
         # update tqdm loop
         loop.set_postfix(loss=loss.item()) # additional data to display in the loading bar
-
+        epoch_loss += loss.item()
+    
+    # average loss of this epoch
+    average_epoch_loss = epoch_loss / len(loader)
+    return average_epoch_loss
 
 def main():
-    
-    # split dataset folder into cats and dogs folder
-    split_dataset(TRAIN_MASK_DIR)
-
-    # create datasets
-    cat_train_aug_dataset = PetDataset(image_dir=TRAIN_IMAGE_DIR, mask_dir=TRAIN_MASK_DIR, pet_class="cats", transform=augmented_transform)
-
-    cat_train_org_dataset = PetDataset(image_dir=TRAIN_IMAGE_DIR, mask_dir=TRAIN_MASK_DIR, pet_class="cats")
-
-    dog_train_aug_dataset = PetDataset(image_dir=TRAIN_IMAGE_DIR, mask_dir=TRAIN_MASK_DIR, pet_class="dogs", transform=augmented_transform)
-
-    print(f"Length of new cat to dog ratio: {(len(cat_train_aug_dataset) + len(cat_train_org_dataset))/len(dog_train_aug_dataset)}")
-
-
-    test_dataset = PetDataset(image_dir=TEST_IMAGE_DIR, mask_dir=TEST_MASK_DIR)
-
-    train_val_dataset = ConcatDataset([cat_train_aug_dataset, cat_train_org_dataset, dog_train_aug_dataset])
-    train_dataset, val_dataset = random_split(train_val_dataset, [0.9, 0.1])
-    print(f"Length of train dataset: {len(train_dataset)}")
-    print(f"Length of validation dataset: {len(val_dataset)}")
 
     # create data loaders
     train_loader, val_loader = utils.get_loaders(
-    train_dataset,
-    val_dataset,
     num_workers=NUM_WORKERS,
     batch_size=BATCH_SIZE,
 )
@@ -85,25 +61,33 @@ def main():
     model = ClipSegmentation(in_channels=3, out_channels=3).to(DEVICE)
     loss_fn = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
-
+    metric = utils.MetricStorage()
     if LOAD_MODEL:
         utils.load_checkpoint(torch.load("CLIP_checkpoint.pth.tar"), model)
-
-    utils.check_accuracy(val_loader, model, device=DEVICE_NAME)
+    
+    utils.check_accuracy(val_loader, model, loss_fn, metric, device=DEVICE_NAME)
     scaler = torch.GradScaler()
+    early_stopping = utils.EarlyStopping(min_delta=0.02, patience=3)
 
     for epoch in range(NUM_EPOCHS):
-        train(train_loader, model, optimizer, loss_fn, scaler)
+        epoch_loss = train(train_loader, model, optimizer, loss_fn, scaler)
+        metric.total_loss.append(epoch_loss)
 
         # save model
         checkpoint = {
             "state_dict": model.state_dict(),
             "optimizer":optimizer.state_dict(),
         }
-        utils.save_checkpoint(checkpoint, filename="CLIP_checkpoint.pth.tar")
+        utils.save_checkpoint(checkpoint, filename=f"CLIP_checkpoint_{epoch}.pth.tar")
 
-        # check accuracy
-        utils.check_accuracy(val_loader, model, device=DEVICE_NAME)
+        # early stopping based on validation loss
+        utils.check_accuracy(val_loader, model, loss_fn, metric, device=DEVICE_NAME)
+
+        # passes the current epoch validation loss to early stopping class
+        if (early_stopping.step(metric.total_val_loss[-1])):
+            utils.log_training(epoch=epoch, loss=epoch_loss, best=early_stopping.best, wait=early_stopping.wait)
+            break
+
 
         # print some examples to a folder
         # TODO: currently not working -> result type Float can't be cast to the desired output type Long
