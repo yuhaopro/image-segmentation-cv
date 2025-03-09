@@ -14,7 +14,7 @@ NUM_WORKERS = 4
 LEARNING_RATE = 1e-5
 LOAD_MODEL = False
 NUM_EPOCHS = 20
-DEVICE_NAME = "cpu"
+DEVICE_NAME = "cuda"
 DEVICE =  torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # train for each epoch
@@ -27,11 +27,11 @@ def train(loader, model, optimizer, loss_fn, scaler):
         # print(f"batch: {batch_idx} images: {images.size()} masks: {masks.size()}")
         images = images.to(device=DEVICE)
         masks = masks.long().to(device=DEVICE) # batch, class, height, width
-        print(f"masks shape: {masks.shape}")
+        # print(f"masks shape: {masks.shape}")
         # forward
         with torch.autocast(device_type=DEVICE_NAME): # convolutions are much faster in lower_precision_fp
             predictions = model(images)
-            print(f"predictions shape: {masks.shape}")
+            # print(f"predictions shape: {masks.shape}")
 
             loss = loss_fn(predictions, masks)
 
