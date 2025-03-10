@@ -65,7 +65,7 @@ def main():
     if LOAD_MODEL:
         utils.load_checkpoint(torch.load("CLIP_checkpoint.pth.tar"), model)
     
-    utils.check_accuracy(val_loader, model, loss_fn, metric, device=DEVICE_NAME)
+    utils.check_accuracy(loader=val_loader,model=model,metric=metric,loss_fn=loss_fn, device=DEVICE_NAME, filename="Train")
     scaler = torch.GradScaler()
     early_stopping = utils.EarlyStopping(min_delta=0.02, patience=3)
 
@@ -81,7 +81,7 @@ def main():
         utils.save_checkpoint(checkpoint, filename=f"CLIP_checkpoint_{epoch}.pth.tar")
 
         # early stopping based on validation loss
-        utils.check_accuracy(val_loader, model, loss_fn, metric, device=DEVICE_NAME)
+        utils.check_accuracy(loader=val_loader,model=model,metric=metric,loss_fn=loss_fn, device=DEVICE_NAME, filename="Train")
 
         # passes the current epoch validation loss to early stopping class
         utils.log_training(epoch=epoch, loss=epoch_loss, best=early_stopping.best, wait=early_stopping.wait)

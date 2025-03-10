@@ -9,6 +9,7 @@ import torch.optim as optim
 import pickle as pkl
 import os
 from dataset import PetDataset, augmented_transform
+import torch.nn as nn
 
 TRAIN_IMAGE_DIR = f"{os.getcwd()}/Dataset/TrainVal/color"
 TRAIN_MASK_DIR = f"{os.getcwd()}/Dataset/TrainVal/label"
@@ -85,6 +86,20 @@ def log_training(epoch, loss, best, wait):
         f"wait={wait}"
     )
 
+def get_test_loader(
+        batch_size,
+        num_workers=4,
+        pin_memory=True
+):
+    test_dataset = PetDataset(image_dir=TEST_IMAGE_DIR, mask_dir=TEST_MASK_DIR)
+    test_loader = DataLoader(
+        test_dataset,
+        batch_size=batch_size,
+        num_workers=num_workers,
+        pin_memory=pin_memory,
+        shuffle=True,
+    )
+    return test_loader
 
 # create the dataset and the loaders here.
 def get_loaders(
@@ -146,7 +161,7 @@ def compute_dice_coefficient(preds, targets, eps=1e-8):
     dice = (2 * intersection) / (preds.sum() + targets.sum() + eps)
     return dice.item()
 
-def check_accuracy(loader, model, loss_fn, metric: MetricStorage, device="cuda"):
+def check_accuracy(loader, model, metric, loss_fn=nn.CrossEntropyLoss(), device="cuda", filename=""):
     cat_dice_score = 0
     dog_dice_score = 0
     bg_dice_score = 0
@@ -210,7 +225,7 @@ def check_accuracy(loader, model, loss_fn, metric: MetricStorage, device="cuda")
     metric.total_val_loss.append(epoch_validation_loss/len(loader))
 
     metric.print_latest_scores()
-    save_metric(metric, model.__class__.__name__)
+    save_metric(metric, f"{filename}{model.__class__.__name__}")
 
     model.train()
 
