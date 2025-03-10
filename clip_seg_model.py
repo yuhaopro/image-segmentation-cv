@@ -5,6 +5,7 @@ from torchvision.io import read_image
 from transformers import CLIPVisionModel, CLIPImageProcessor
 from torchvision.utils import save_image
 from PIL import Image
+import utils
 
 
 class DoubleConv(nn.Module):
@@ -94,13 +95,17 @@ class ClipSegmentation(nn.Module):
         return seg_map
 
 def main():
+    # load the model
+    LOAD_MODEL = True
     model = ClipSegmentation(out_channels=3)  # 3 classes for segmentation
+    if LOAD_MODEL:
+        utils.load_checkpoint(torch.load("CLIP_checkpoint_10.pth.tar"), model)
     image = read_image("images/Abyssinian_1_color.jpg")
     image_tensor = image.unsqueeze(0)
-    print(f"Input shape: {image_tensor.size()}")  # Should be [2, 2, 224, 224]
+    print(f"Input shape: {image_tensor.size()}")  # Should be [1, 3, 400, 600]
 
     output = model(image_tensor)
-    print(f"Output shape: {output.size()}")  # Should be [2, 2, 224, 224]
+    print(f"Output shape: {output.size()}")  # Should be [2, 2, 400, 600]
     seg_mask = output.squeeze(0)
     save_image(seg_mask, "clip_seg_test.png")
 if __name__ == "__main__":

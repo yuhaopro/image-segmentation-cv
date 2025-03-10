@@ -25,7 +25,7 @@ NUM_WORKERS = 4
 LEARNING_RATE = 1e-5
 LOAD_MODEL = True
 NUM_EPOCHS = 10
-DEVICE_NAME = "cpu"
+DEVICE_NAME = "cuda"
 DEVICE =  torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 

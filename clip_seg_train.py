@@ -84,8 +84,8 @@ def main():
         utils.check_accuracy(val_loader, model, loss_fn, metric, device=DEVICE_NAME)
 
         # passes the current epoch validation loss to early stopping class
+        utils.log_training(epoch=epoch, loss=epoch_loss, best=early_stopping.best, wait=early_stopping.wait)
         if (early_stopping.step(metric.total_val_loss[-1])):
-            utils.log_training(epoch=epoch, loss=epoch_loss, best=early_stopping.best, wait=early_stopping.wait)
             break
 
 
