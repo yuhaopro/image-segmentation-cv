@@ -256,37 +256,3 @@ def save_predictions_as_imgs(
         torchvision.utils.save_image(y, f"{folder}{idx}.png")
 
     model.train()
-
-def main():
-    BATCH_SIZE = 16
-    PIN_MEMORY = True
-    NUM_WORKERS = 4
-    LEARNING_RATE = 0.00005
-    LOAD_MODEL = False
-    NUM_EPOCHS = 5
-    DEVICE = "cpu"
-
-    model = UNET(in_channels=3, out_channels=4).to(DEVICE)
-    loss_fn = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
-    with open("/teamspace/studios/this_studio/image-segmentation-cv/Dataset/train.pkl", "rb") as f:
-        train_dataset = pkl.load(f)
-
-    with open("/teamspace/studios/this_studio/image-segmentation-cv/Dataset/val.pkl", "rb") as f:
-        val_dataset = pkl.load(f)
-
-    with open("/teamspace/studios/this_studio/image-segmentation-cv/Dataset/test.pkl", "rb") as f:
-        test_dataset = pkl.load(f)
-    
-    train_loader, val_loader = get_loaders(
-        train_dataset,
-        val_dataset,
-        num_workers=NUM_WORKERS,
-        batch_size=BATCH_SIZE,
-    ) 
-    
-    check_accuracy(val_loader, model, device=DEVICE)
-
-
-if __name__ == "__main__":
-    main()
