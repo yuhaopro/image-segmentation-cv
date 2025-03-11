@@ -12,7 +12,7 @@ DEVICE =  torch.device("cuda" if torch.cuda.is_available() else "cpu")
 def main():
     model = UNET(out_channels=3).to(device=DEVICE)
     if LOAD_MODEL:
-        utils.load_checkpoint(torch.load("CLIP_checkpoint.pth.tar"), model)
+        utils.load_checkpoint(torch.load("CLIP_checkpoint_10.pth.tar"), model)
     test_loader = utils.get_test_loader(batch_size=BATCH_SIZE)
     metric = utils.MetricStorage()
     loss_fn = nn.CrossEntropyLoss()

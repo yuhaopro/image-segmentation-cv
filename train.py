@@ -51,7 +51,7 @@ def train_per_epoch(loader, model, optimizer, loss_fn, scaler):
     average_epoch_loss = epoch_loss / len(loader)
     return average_epoch_loss
 
-def train(model, loss_fn, optimizer, metric, scaler, early_stopping, checkpoint=None):
+def train(model, loss_fn, optimizer, metric, scaler, early_stopping, checkpoint=""):
 
     # create data loaders
     train_loader, val_loader = utils.get_loaders(
