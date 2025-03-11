@@ -7,3 +7,4 @@ processed_dataset/
 .idea
 __pycache__
 *.pth.*
+.vscode

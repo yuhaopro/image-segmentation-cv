@@ -12,8 +12,8 @@ BATCH_SIZE = 64
 PIN_MEMORY = True
 NUM_WORKERS = 4
 LEARNING_RATE = 1e-5
-LOAD_MODEL = False
-CHECKPOINT = "ClipSegmentation_checkpoint_10.pth.tar" # only used if LOAD_MODEL is True
+LOAD_MODEL = True
+CHECKPOINT = "CLIP_checkpoint_10.pth.tar" # only used if LOAD_MODEL is True
 NUM_EPOCHS = 20
 DEVICE_NAME = "cuda"
 DEVICE =  torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -30,7 +30,7 @@ def train_per_epoch(loader, model, optimizer, loss_fn, scaler):
         images = images.float().to(device=DEVICE)
         masks = masks.long().to(device=DEVICE) # batch, class, height, width
         # print(f"masks shape: {masks.shape}")
-        # forward
+        
         with torch.autocast(device_type=DEVICE_NAME): # convolutions are much faster in lower_precision_fp
             predictions = model(images)
             # print(f"predictions shape: {masks.shape}")

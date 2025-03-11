@@ -32,7 +32,10 @@ class MetricStorage:
         self.dog_accuracy_score = []
         self.bg_iou_score = []
         self.bg_dice_score = []
-        self.bg_accuracy_score = []        
+        self.bg_accuracy_score = []
+
+        self.average_dice_score = []
+        self.average_iou_score = []    
     
     def print_latest_scores(self):
         print(f"Cat IOU Score: {self.cat_iou_score[-1]}")
@@ -47,11 +50,17 @@ class MetricStorage:
         print(f"Validation loss for this epoch: {self.total_val_loss[-1]}")
         if len(self.total_loss) != 0:
             print(f"Training loss for this epoch: {self.total_loss[-1]}")
+        
+    def compute_average_dice_score(self):
+        average_dice_score = (self.cat_dice_score[-1] + self.dog_dice_score[-1] + self.bg_dice_score[-1]) / 3
+        self.average_dice_score.append(average_dice_score)
 
-        pass
+    def compute_average_iou_score(self):
+        average_iou_score = (self.cat_iou_score[-1] + self.dog_iou_score[-1] + self.bg_iou_score[-1]) / 3
+        self.average_iou_score.append(average_iou_score)
 
 class EarlyStopping:
-    def __init__(self, min_delta=0.02, patience=2):
+    def __init__(self, min_delta=0.001, patience=2):
         self.min_delta = min_delta
         self.patience = patience
         self.best = float("inf")
@@ -85,21 +94,6 @@ def log_training(epoch, loss, best, wait):
         f"best={best:.02f}"
         f"wait={wait}"
     )
-
-def get_test_loader(
-        batch_size,
-        num_workers=4,
-        pin_memory=True
-):
-    test_dataset = PetDataset(image_dir=TEST_IMAGE_DIR, mask_dir=TEST_MASK_DIR)
-    test_loader = DataLoader(
-        test_dataset,
-        batch_size=batch_size,
-        num_workers=num_workers,
-        pin_memory=pin_memory,
-        shuffle=True,
-    )
-    return test_loader
 
 # create the dataset and the loaders here.
 def get_loaders(
@@ -161,7 +155,7 @@ def compute_dice_coefficient(preds, targets, eps=1e-8):
     dice = (2 * intersection) / (preds.sum() + targets.sum() + eps)
     return dice.item()
 
-def check_accuracy(loader, model, metric, loss_fn=nn.CrossEntropyLoss(), device="cuda", filename=""):
+def check_accuracy(loader, model, metric: MetricStorage, loss_fn=nn.CrossEntropyLoss(), device="cuda", filename=""):
     cat_dice_score = 0
     dog_dice_score = 0
     bg_dice_score = 0
@@ -224,6 +218,8 @@ def check_accuracy(loader, model, metric, loss_fn=nn.CrossEntropyLoss(), device=
     metric.bg_accuracy_score.append(bg_accuracy_score/len(loader))
     metric.total_val_loss.append(epoch_validation_loss/len(loader))
 
+    metric.compute_average_dice_score()
+    metric.compute_average_iou_score()
     metric.print_latest_scores()
     save_metric(metric, f"{filename}{model.__class__.__name__}")
 

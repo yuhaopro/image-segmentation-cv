@@ -40,8 +40,8 @@ def split_dataset(mask_dir=TRAIN_MASK_DIR):
             shutil.move(f"{TRAIN_COLOR_DIR}/{image_name}", f"{TRAIN_COLOR_DIR}/dogs/{image_name}")
             shutil.move(f"{TRAIN_MASK_DIR}/{mask_name}", f"{TRAIN_MASK_DIR}/dogs/{mask_name}")
 
-def main():
-    split_dataset(TRAIN_MASK_DIR)
-
-if __name__ == "__main__":
-    main()
+# def main():
+#     split_dataset(TRAIN_MASK_DIR)
+#
+# if __name__ == "__main__":
+#     main()
