@@ -1,4 +1,5 @@
 from clip_seg_model import ClipSegmentation
+from unet_model import UNET
 import utils 
 import torch.nn as nn
 import torch
@@ -9,7 +10,7 @@ DEVICE =  torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 def main():
-    model = ClipSegmentation(out_channels=3).to(device=DEVICE)
+    model = UNET(out_channels=3).to(device=DEVICE)
     if LOAD_MODEL:
         utils.load_checkpoint(torch.load("CLIP_checkpoint.pth.tar"), model)
     test_loader = utils.get_test_loader(batch_size=BATCH_SIZE)

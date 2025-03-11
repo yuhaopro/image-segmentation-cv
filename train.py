@@ -5,20 +5,22 @@ import torch.nn as nn
 import torch.optim as optim
 import random
 from clip_seg_model import ClipSegmentation
-import os
+from unet_model import UNET
 
 random.seed(42)
 BATCH_SIZE = 64
 PIN_MEMORY = True
 NUM_WORKERS = 4
 LEARNING_RATE = 1e-5
-LOAD_MODEL = False
+LOAD_MODEL = True
+CHECKPOINT = "ClipSegmentation_checkpoint_10.pth.tar" # only used if LOAD_MODEL is True
 NUM_EPOCHS = 20
 DEVICE_NAME = "cuda"
 DEVICE =  torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+
 # train for each epoch
-def train(loader, model, optimizer, loss_fn, scaler):
+def train_per_epoch(loader, model, optimizer, loss_fn, scaler):
     loop = tqdm(loader)
 
     # total loss for this epoch
@@ -49,7 +51,7 @@ def train(loader, model, optimizer, loss_fn, scaler):
     average_epoch_loss = epoch_loss / len(loader)
     return average_epoch_loss
 
-def main():
+def train(model, loss_fn, optimizer, metric, scaler, early_stopping, checkpoint=None):
 
     # create data loaders
     train_loader, val_loader = utils.get_loaders(
@@ -58,19 +60,13 @@ def main():
 )
 
     # initialize the model, loss and optimizer
-    model = ClipSegmentation(in_channels=3, out_channels=3).to(DEVICE)
-    loss_fn = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
-    metric = utils.MetricStorage()
     if LOAD_MODEL:
-        utils.load_checkpoint(torch.load("CLIP_checkpoint.pth.tar"), model)
+        utils.load_checkpoint(torch.load(checkpoint), model)
     
     utils.check_accuracy(loader=val_loader,model=model,metric=metric,loss_fn=loss_fn, device=DEVICE_NAME, filename="Train")
-    scaler = torch.GradScaler()
-    early_stopping = utils.EarlyStopping(min_delta=0.02, patience=3)
 
     for epoch in range(NUM_EPOCHS):
-        epoch_loss = train(train_loader, model, optimizer, loss_fn, scaler)
+        epoch_loss = train_per_epoch(train_loader, model, optimizer, loss_fn, scaler)
         metric.total_loss.append(epoch_loss)
 
         # save model
@@ -78,7 +74,7 @@ def main():
             "state_dict": model.state_dict(),
             "optimizer":optimizer.state_dict(),
         }
-        utils.save_checkpoint(checkpoint, filename=f"CLIP_checkpoint_{epoch}.pth.tar")
+        utils.save_checkpoint(checkpoint, filename=f"{model.__class__.__name__}_checkpoint_{epoch}.pth.tar")
 
         # early stopping based on validation loss
         utils.check_accuracy(loader=val_loader,model=model,metric=metric,loss_fn=loss_fn, device=DEVICE_NAME, filename="Train")
@@ -89,11 +85,13 @@ def main():
             break
 
 
-        # print some examples to a folder
-        # TODO: currently not working -> result type Float can't be cast to the desired output type Long
-        # utils.save_predictions_as_imgs(
-        #     val_loader, model, folder="saved_images", device=DEVICE
-        # )
-
 if __name__ == "__main__":
-    main()
+
+    # substitute with appropriate model for training
+    model = UNET(in_channels=3, out_channels=3).to(DEVICE)
+    loss_fn = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
+    metric = utils.MetricStorage()
+    scaler = torch.GradScaler()
+    early_stopping = utils.EarlyStopping(min_delta=0.05, patience=3)
+    train(model=model, loss_fn=loss_fn, optimizer=optimizer, metric=metric, scaler=scaler, early_stopping=early_stopping, checkpoint=CHECKPOINT)
