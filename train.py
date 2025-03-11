@@ -12,7 +12,7 @@ BATCH_SIZE = 64
 PIN_MEMORY = True
 NUM_WORKERS = 4
 LEARNING_RATE = 1e-5
-LOAD_MODEL = True
+LOAD_MODEL = False
 CHECKPOINT = "ClipSegmentation_checkpoint_10.pth.tar" # only used if LOAD_MODEL is True
 NUM_EPOCHS = 20
 DEVICE_NAME = "cuda"
@@ -27,7 +27,7 @@ def train_per_epoch(loader, model, optimizer, loss_fn, scaler):
     epoch_loss = 0
     for batch_idx, (images, masks) in enumerate(loop):
         # print(f"batch: {batch_idx} images: {images.size()} masks: {masks.size()}")
-        images = images.to(device=DEVICE)
+        images = images.float().to(device=DEVICE)
         masks = masks.long().to(device=DEVICE) # batch, class, height, width
         # print(f"masks shape: {masks.shape}")
         # forward

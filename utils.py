@@ -175,7 +175,7 @@ def check_accuracy(loader, model, metric, loss_fn=nn.CrossEntropyLoss(), device=
     model.eval()
     with torch.no_grad():
         for x, y in loader:
-            x = x.to(device)
+            x = x.float().to(device)
             # print(f"input shape: {x.size()}") # input shape: torch.Size([64, 3, 256, 256])
 
             y = y.long().to(device)
