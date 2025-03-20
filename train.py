@@ -5,17 +5,18 @@ import torch.nn as nn
 import torch.optim as optim
 import random
 from clip_seg_model import ClipSegmentation
-from unet_model import UNET
+# from unet_model import UNET
+from unet_model_with_resize import UNET
 
 random.seed(42)
 BATCH_SIZE = 64
 PIN_MEMORY = True
 NUM_WORKERS = 4
 LEARNING_RATE = 1e-5
-LOAD_MODEL = True
+LOAD_MODEL = False
 CHECKPOINT = "CLIP_checkpoint_10.pth.tar" # only used if LOAD_MODEL is True
 NUM_EPOCHS = 20
-DEVICE_NAME = "cuda"
+DEVICE_NAME = "cpu"
 DEVICE =  torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
@@ -61,7 +62,7 @@ def train(model, loss_fn, optimizer, metric, scaler, early_stopping, checkpoint=
 
     # initialize the model, loss and optimizer
     if LOAD_MODEL:
-        utils.load_checkpoint(torch.load(checkpoint), model)
+        utils.load_checkpoint(torch.load(checkpoint, map_location=DEVICE), model)
     
     utils.check_accuracy(loader=val_loader,model=model,metric=metric,loss_fn=loss_fn, device=DEVICE_NAME, filename="Train")
 
@@ -88,10 +89,10 @@ def train(model, loss_fn, optimizer, metric, scaler, early_stopping, checkpoint=
 if __name__ == "__main__":
 
     # substitute with appropriate model for training
-    model = UNET(in_channels=3, out_channels=3).to(DEVICE)
+    model = ClipSegmentation(in_channels=3, out_channels=3).to(DEVICE)
     loss_fn = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
     metric = utils.MetricStorage()
     scaler = torch.GradScaler()
-    early_stopping = utils.EarlyStopping(min_delta=0.05, patience=3)
+    early_stopping = utils.EarlyStopping(min_delta=0.001, patience=3)
     train(model=model, loss_fn=loss_fn, optimizer=optimizer, metric=metric, scaler=scaler, early_stopping=early_stopping, checkpoint=CHECKPOINT)

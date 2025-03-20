@@ -36,13 +36,20 @@ color_to_class = {
     255: 0   # Boundary
 }
 
-def convert_class_to_color(class_mask):
+color_to_class_test = {
+    0: 0,    # Background
+    38: 1,   # Cat
+    75: 2,   # Dog
+    255: 3   # Boundary
+}
+
+def convert_class_to_color(class_mask, class_to_color):
     placeholder = torch.zeros_like(class_mask)
     for class_idx, color in class_to_color.items():
         placeholder[class_mask == class_idx] = color
     return placeholder
 
-def convert_color_to_class(color_mask):
+def convert_color_to_class(color_mask, color_to_class):
     placeholder = torch.zeros_like(color_mask)
     for color_idx, _class in color_to_class.items():
         placeholder[color_mask == color_idx] = _class
@@ -54,7 +61,7 @@ def remove_class_dimension(mask):
     return class_indices
 
 default_transform = A.Compose([
-    A.Resize(height=IMAGE_HEIGHT, width=IMAGE_WIDTH),
+    # A.Resize(height=IMAGE_HEIGHT, width=IMAGE_WIDTH),
     # A.CenterCrop(height=IMAGE_HEIGHT, width=IMAGE_WIDTH, pad_if_needed=True),
     A.ToTensorV2(transpose_mask=True),           
 ], seed=137, strict=True)
@@ -80,11 +87,12 @@ class PetDataset(Dataset):
     pet_class: creates a dataset with either "cats" or "dogs" only
     transform: transformation on the images and mask, default normalizes image and convert to tensor
     """
-    def __init__(self, image_dir, mask_dir, pet_class = None, transform = default_transform):
+    def __init__(self, image_dir, mask_dir, pet_class = None, transform = default_transform, mode="train"):
         self.image_dir = f"{image_dir}/{pet_class}" if pet_class != None else image_dir
         self.mask_dir = f"{mask_dir}/{pet_class}" if pet_class != None else mask_dir
         self.transform = transform
         self.images = os.listdir(self.mask_dir)
+        self.mode = mode
 
     def __len__(self):
         return len(self.images)
@@ -99,7 +107,11 @@ class PetDataset(Dataset):
         augmented = self.transform(image=image, mask=mask)
         image = augmented["image"]
         mask = augmented["mask"]
-        mask = convert_color_to_class(mask)
+        if self.mode == "test":
+            # this does not convert boundary to background
+            mask = convert_color_to_class(mask, color_to_class_test)
+        else:
+            mask = convert_color_to_class(mask, color_to_class)
         # mask = add_class_dimension(mask)
-        return image, mask
+        return image, mask, image.size
     
