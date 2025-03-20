@@ -113,5 +113,5 @@ class PetDataset(Dataset):
         else:
             mask = convert_color_to_class(mask, color_to_class)
         # mask = add_class_dimension(mask)
-        return image, mask, image.size
+        return image, mask
     

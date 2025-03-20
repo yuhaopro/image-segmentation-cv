@@ -49,7 +49,7 @@ def plot_relationship(perturbation_name: str, perturbations: List[int], dice_sco
 
 def test(transform, metric, model=None):
     # creating test dataset
-    test_dataset = PetDataset(image_dir=TEST_IMAGE_DIR, mask_dir=TEST_MASK_DIR, transform=transform)
+    test_dataset = PetDataset(image_dir=TEST_IMAGE_DIR, mask_dir=TEST_MASK_DIR, transform=transform, mode="test")
     test_loader = DataLoader(
         test_dataset,
         batch_size=BATCH_SIZE,
@@ -58,7 +58,7 @@ def test(transform, metric, model=None):
         shuffle=True,
     )
     loss_fn = nn.CrossEntropyLoss()
-    utils.check_accuracy(loader=test_loader, model=model, metric=metric, loss_fn=loss_fn, device=DEVICE_NAME, filename="Test")
+    utils.check_accuracy(loader=test_loader, model=model, metric=metric, loss_fn=loss_fn, device=DEVICE_NAME, filename="Test", mode='test')
 
 def test_gaussian_pixel_noise(model, perturbations, metric):
 

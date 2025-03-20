@@ -47,7 +47,8 @@ class MetricStorage:
         print(f"Cat Accuracy Score: {self.cat_accuracy_score[-1]}")
         print(f"Dog Accuracy Score: {self.dog_accuracy_score[-1]}")
         print(f"Background Accuracy Score: {self.bg_accuracy_score[-1]}")
-        print(f"Validation loss for this epoch: {self.total_val_loss[-1]}")
+        if len(self.total_val_loss) != 0:
+            print(f"Validation loss for this epoch: {self.total_val_loss[-1]}")
         if len(self.total_loss) != 0:
             print(f"Training loss for this epoch: {self.total_loss[-1]}")
         
@@ -155,7 +156,7 @@ def compute_dice_coefficient(preds, targets, eps=1e-8):
     dice = (2 * intersection) / (preds.sum() + targets.sum() + eps)
     return dice.item()
 
-def check_accuracy(loader, model, metric: MetricStorage, loss_fn=nn.CrossEntropyLoss(), device="cuda", filename=""):
+def check_accuracy(loader, model, metric: MetricStorage, loss_fn=nn.CrossEntropyLoss(ignore_index=3), device="cuda", filename="", mode="val"):
     cat_dice_score = 0
     dog_dice_score = 0
     bg_dice_score = 0
@@ -176,9 +177,9 @@ def check_accuracy(loader, model, metric: MetricStorage, loss_fn=nn.CrossEntropy
             # print(f"target mask shape: {y.size()}")  # target mask shape: torch.Size([64, 1, 256, 256])
 
             output = model(x)
-
-            loss = loss_fn(output, y)
-            epoch_validation_loss += loss.item()
+            if (mode == 'val'):
+                loss = loss_fn(output, y)
+                epoch_validation_loss += loss.item()
             # print(f"Evaluation Loss: {loss}")
             # print(f"output shape: {output.size()}") # output shape: torch.Size([64, 3, 256, 256])
             probabilities = F.softmax(output, dim=1) 
