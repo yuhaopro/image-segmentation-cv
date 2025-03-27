@@ -45,7 +45,7 @@ class AutoencoderWithSegmentationHead(nn.Module):
             nn.ReLU(),
             nn.Conv2d(64, 32, kernel_size=3, padding=1),
             nn.ReLU(),
-            nn.Conv2d(64, num_classes, kernel_size=1),
+            nn.Conv2d(32, num_classes, kernel_size=1),
             nn.Upsample(size=(256, 256), mode='bilinear', align_corners=False)
         )
 
