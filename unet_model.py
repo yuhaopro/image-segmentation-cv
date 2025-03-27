@@ -55,6 +55,8 @@ class UNET(nn.Module):
                     feature*2, feature, kernel_size=2, stride=2,
                 )
             )
+            
+            # after concat with skip connections -> 512 + 512 = 1024, double conv needs input features*2
             self.ups.append(DoubleConv(feature*2, feature))
 
         self.bottleneck = DoubleConv(features[-1], features[-1]*2)
@@ -63,6 +65,8 @@ class UNET(nn.Module):
         self.final_conv = nn.Conv2d(features[0], out_channels, kernel_size=1)
         
     def forward(self, x):
+        
+        # [64, 128, 256, 512]
         skip_connections = []
 
         for down in self.downs:
@@ -75,6 +79,7 @@ class UNET(nn.Module):
         # reverse the skip connections
         skip_connections = skip_connections[::-1]
 
+        # step 2 because up contains upsample and conv
         for idx in range(0, len(self.ups), 2):
             x = self.ups[idx](x)
             skip_connection = skip_connections[idx//2]

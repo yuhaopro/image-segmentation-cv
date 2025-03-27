@@ -1,6 +1,5 @@
 from typing import List
 from clip_seg_model import ClipSegmentation
-from train import CHECKPOINT
 from unet_model import UNET
 import utils 
 import torch.nn as nn
@@ -23,6 +22,7 @@ NUM_WORKERS = 4
 PIN_MEMORY = True
 DEVICE_NAME = "cpu"
 DEVICE =  torch.device("cuda" if torch.cuda.is_available() else "cpu")
+CHECKPOINT = "CLIP_checkpoint_10.pth.tar"
 
 def plot_relationship(perturbation_name: str, perturbations: List[int], dice_scores: List[float]):
     # Create the plot

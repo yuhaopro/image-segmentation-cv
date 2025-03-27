@@ -1,4 +1,3 @@
-
 import os
 from torch.utils.data import Dataset
 import numpy as np
@@ -18,36 +17,28 @@ This file contains the PetDataset class, augmentation pipelines, and utility fun
 
 
 # create proper class labels
-class_to_color = {
-    0: 0,    # Background
-    1: 38,   # Cat
-    2: 75,   # Dog
-    3: 0   # Boundary
-}
+class_to_color = {0: 0, 1: 38, 2: 75, 3: 0}  # Background  # Cat  # Dog  # Boundary
 
 """
 Conversion of mask pixel to class labels.
 Boundary is counted as background.
 """
-color_to_class = {
-    0: 0,    # Background
-    38: 1,   # Cat
-    75: 2,   # Dog
-    255: 0   # Boundary
-}
+color_to_class = {0: 0, 38: 1, 75: 2, 255: 0}  # Background  # Cat  # Dog  # Boundary
 
 color_to_class_test = {
-    0: 0,    # Background
-    38: 1,   # Cat
-    75: 2,   # Dog
-    255: 3   # Boundary
+    0: 0,  # Background
+    38: 1,  # Cat
+    75: 2,  # Dog
+    255: 3,  # Boundary
 }
+
 
 def convert_class_to_color(class_mask, class_to_color):
     placeholder = torch.zeros_like(class_mask)
     for class_idx, color in class_to_color.items():
         placeholder[class_mask == class_idx] = color
     return placeholder
+
 
 def convert_color_to_class(color_mask, color_to_class):
     placeholder = torch.zeros_like(color_mask)
@@ -60,22 +51,31 @@ def remove_class_dimension(mask):
     class_indices = torch.argmax(mask, dim=0)
     return class_indices
 
-default_transform = A.Compose([
-    # A.Resize(height=IMAGE_HEIGHT, width=IMAGE_WIDTH),
-    # A.CenterCrop(height=IMAGE_HEIGHT, width=IMAGE_WIDTH, pad_if_needed=True),
-    A.ToTensorV2(transpose_mask=True),           
-], seed=137, strict=True)
 
-augmented_transform = A.Compose([
-    A.Resize(height=IMAGE_HEIGHT, width=IMAGE_WIDTH),
-    # A.CenterCrop(height=IMAGE_HEIGHT, width=IMAGE_WIDTH, pad_if_needed=True),
-    A.HorizontalFlip(p=0.5),
-    A.VerticalFlip(p=0.5),               
-    A.Rotate(limit=(-40,40)),
-    A.ElasticTransform(p=0.5),
-    A.ColorJitter(), 
-    A.ToTensorV2(transpose_mask=True),           
-], seed=137, strict=True)
+default_transform = A.Compose(
+    [
+        # A.Resize(height=IMAGE_HEIGHT, width=IMAGE_WIDTH),
+        # A.CenterCrop(height=IMAGE_HEIGHT, width=IMAGE_WIDTH, pad_if_needed=True),
+        A.ToTensorV2(transpose_mask=True),
+    ],
+    seed=137,
+    strict=True,
+)
+
+augmented_transform = A.Compose(
+    [
+        A.Resize(height=IMAGE_HEIGHT, width=IMAGE_WIDTH),
+        # A.CenterCrop(height=IMAGE_HEIGHT, width=IMAGE_WIDTH, pad_if_needed=True),
+        A.HorizontalFlip(p=0.5),
+        A.VerticalFlip(p=0.5),
+        A.Rotate(limit=(-40, 40)),
+        A.ElasticTransform(p=0.5),
+        A.ColorJitter(),
+        A.ToTensorV2(transpose_mask=True),
+    ],
+    seed=137,
+    strict=True,
+)
 
 
 class PetDataset(Dataset):
@@ -87,7 +87,15 @@ class PetDataset(Dataset):
     pet_class: creates a dataset with either "cats" or "dogs" only
     transform: transformation on the images and mask, default normalizes image and convert to tensor
     """
-    def __init__(self, image_dir, mask_dir, pet_class = None, transform = default_transform, mode="train"):
+
+    def __init__(
+        self,
+        image_dir,
+        mask_dir,
+        pet_class=None,
+        transform=default_transform,
+        mode="train",
+    ):
         self.image_dir = f"{image_dir}/{pet_class}" if pet_class != None else image_dir
         self.mask_dir = f"{mask_dir}/{pet_class}" if pet_class != None else mask_dir
         self.transform = transform
@@ -97,8 +105,10 @@ class PetDataset(Dataset):
     def __len__(self):
         return len(self.images)
 
-    def __getitem__(self, index):        
-        img_path = os.path.join(self.image_dir, self.images[index]).replace(".png", ".jpg")
+    def __getitem__(self, index):
+        img_path = os.path.join(self.image_dir, self.images[index]).replace(
+            ".png", ".jpg"
+        )
         mask_path = os.path.join(self.mask_dir, self.images[index])
 
         image = np.array(Image.open(img_path).convert("RGB"))
@@ -114,4 +124,3 @@ class PetDataset(Dataset):
             mask = convert_color_to_class(mask, color_to_class)
         # mask = add_class_dimension(mask)
         return image, mask
-    

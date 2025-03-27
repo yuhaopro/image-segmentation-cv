@@ -6,7 +6,7 @@ import torch.optim as optim
 import random
 from clip_seg_model import ClipSegmentation
 # from unet_model import UNET
-from unet_model_with_resize import UNET
+from unet_model import UNET
 
 random.seed(42)
 BATCH_SIZE = 64
