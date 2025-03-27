@@ -6,12 +6,15 @@ class Autoencoder(nn.Module):
         super(Autoencoder, self).__init__()
         # Encoder
         self.encoder = nn.Sequential(
-            nn.Conv2d(3, 64, kernel_size=3, stride=2, padding=1),
+            nn.Conv2d(3, 64, kernel_size=3, padding=1),
             nn.ReLU(),
-            nn.Conv2d(64, 128, kernel_size=3, stride=2, padding=1),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Conv2d(64, 128, kernel_size=3, padding=1),
             nn.ReLU(),
-            nn.Conv2d(128, 256, kernel_size=3, stride=2, padding=1),
-            nn.ReLU()
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Conv2d(128, 256, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
         )
 
         # Decoder
@@ -28,22 +31,23 @@ class Autoencoder(nn.Module):
         x = self.encoder(x)
         x = self.decoder(x)
         return x
+    
+    def get_encoder(self):
+        return self.encoder
 
-# 带分割头的自编码器类
+
 class AutoencoderWithSegmentationHead(nn.Module):
-    def __init__(self, encoder, decoder, num_classes=4):
+    def __init__(self, encoder, num_classes=3):
         super(AutoencoderWithSegmentationHead, self).__init__()
         self.encoder = encoder
-        self.decoder = decoder
         self.segmentation_head = nn.Sequential(
-            nn.Conv2d(256, 64, kernel_size=3, padding=1),  # 根据编码器的输出调整
+            nn.Conv2d(256, 128, kernel_size=3, padding=1),
             nn.ReLU(),
-            nn.Conv2d(64, num_classes, kernel_size=1),  # 生成分割预测
-            nn.Upsample(size=(256, 256), mode='bilinear', align_corners=False)  # 上采样调整为256x256
+            nn.Conv2d(64, num_classes, kernel_size=1),
+            nn.Upsample(size=(256, 256), mode='bilinear', align_corners=False)
         )
 
     def forward(self, x):
         encoded = self.encoder(x)
-        decoded = self.decoder(encoded)
         segmentation_output = self.segmentation_head(encoded)
-        return decoded, segmentation_output
+        return segmentation_output
