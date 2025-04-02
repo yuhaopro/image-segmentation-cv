@@ -3,7 +3,7 @@ import os
 import numpy as np
 import shutil
 import argparse
-from dataset_prep_utils import generate_points_from_mask, save_heatmap_to_image, save_mask_to_image
+from utils.dataset_prep import generate_points_from_mask, save_heatmap_to_image, save_mask_to_image
 """
 This script should be ran before the any training or testing.
 """

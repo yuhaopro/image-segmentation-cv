@@ -6,7 +6,7 @@ import torch
 import albumentations as A
 import random
 
-from utils.dataset_utils import convert_color_to_class
+from utils.dataset import convert_color_to_class
 
 random.seed(42)
 

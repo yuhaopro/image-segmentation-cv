@@ -8,7 +8,7 @@ import albumentations as A
 import matplotlib.pyplot as plt
 import numpy as np
 
-from ..utils.train_utils import load_checkpoint, check_accuracy, MetricStorage
+from .train import load_checkpoint, check_accuracy, MetricStorage
 
 IMAGE_HEIGHT = 256
 IMAGE_WIDTH = 256

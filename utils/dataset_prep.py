@@ -28,7 +28,7 @@ def save_mask_to_image(mask, output_path="mask.png"):
 
     image = Image.fromarray(mask, mode='L')  # 'L' for grayscale
     image.save(output_path)
-    print(f"Mask saved to {output_path}")
+    # print(f"Mask saved to {output_path}")
     
     
 
@@ -87,7 +87,7 @@ def save_heatmap_to_image(heatmap, output_path="heatmap.png"):
 
     # Save the image.
     image.save(output_path)
-    print(f"Heatmap saved to {output_path}")
+    # print(f"Heatmap saved to {output_path}")
     
 def generate_points_from_mask(mask, num_samples=1):
     """

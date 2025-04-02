@@ -3,11 +3,10 @@ import torchvision
 from torch.utils.data import DataLoader, ConcatDataset, random_split
 import torch.nn.functional as F
 import torch.nn as nn
-import torch.optim as optim
 import pickle as pkl
 import os
 
-import tqdm
+from tqdm import tqdm
 from dataset.pet import PetDataset, augmented_transform
 import torch.nn as nn
 
@@ -253,34 +252,3 @@ def save_predictions_as_imgs(
     model.train()
     
 
-# train for each epoch
-def train_per_epoch(loader, model, optimizer, loss_fn, scaler, device_name='cpu'):
-    loop = tqdm(loader)
-    device = torch.device(device_name)
-    # total loss for this epoch
-    epoch_loss = 0
-    for batch_idx, (images, masks) in enumerate(loop):
-        # print(f"batch: {batch_idx} images: {images.size()} masks: {masks.size()}")
-        images = images.float().to(device=device)
-        masks = masks.long().to(device=device) # batch, class, height, width
-        # print(f"masks shape: {masks.shape}")
-        
-        with torch.autocast(device_type=device_name): # convolutions are much faster in lower_precision_fp
-            predictions = model(images)
-            # print(f"predictions shape: {masks.shape}")
-
-            loss = loss_fn(predictions, masks)
-
-        # backward
-        optimizer.zero_grad() # in pytorch grad are accumulated, zero it to only account for the current batch of training.
-        scaler.scale(loss).backward() # scale the gradients to prevent them from being flushed to 0 due to computational limits
-        scaler.step(optimizer)
-        scaler.update()
-
-        # update tqdm loop
-        loop.set_postfix(loss=loss.item()) # additional data to display in the loading bar
-        epoch_loss += loss.item()
-    
-    # average loss of this epoch
-    average_epoch_loss = epoch_loss / len(loader)
-    return average_epoch_loss

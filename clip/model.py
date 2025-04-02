@@ -5,7 +5,7 @@ from torchvision.io import read_image
 from transformers import CLIPVisionModel, CLIPImageProcessor
 from torchvision.utils import save_image
 from PIL import Image
-import utils
+import utils.train as train
 
 
 class DoubleConv(nn.Module):
@@ -99,7 +99,7 @@ def main():
     LOAD_MODEL = True
     model = ClipSegmentation(out_channels=3)  # 3 classes for segmentation
     if LOAD_MODEL:
-        utils.load_checkpoint(torch.load("CLIP_checkpoint_10.pth.tar"), model)
+        train.load_checkpoint(torch.load("CLIP_checkpoint_10.pth.tar"), model)
     image = read_image("images/Abyssinian_1_color.jpg")
     image_tensor = image.unsqueeze(0)
     print(f"Input shape: {image_tensor.size()}")  # Should be [1, 3, 400, 600]

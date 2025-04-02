@@ -1,8 +1,8 @@
-import utils.train_utils as train_utils
+import utils.train as train
 from tqdm import tqdm
 import torch
 import random
-from unet.unet_model import UNET
+from unet.model import UNET
 import argparse
 import os
 
@@ -51,16 +51,16 @@ def train_per_epoch(loader, model, optimizer, loss_fn, scaler):
 def train(model, loss_fn, optimizer, metric, scaler, early_stopping, checkpoint=""):
 
     # create data loaders
-    train_loader, val_loader = train_utils.get_loaders(
+    train_loader, val_loader = train.get_loaders(
     num_workers=NUM_WORKERS,
     batch_size=BATCH_SIZE,
 )
 
     # initialize the model, loss and optimizer
     if LOAD_MODEL:
-        train_utils.load_checkpoint(torch.load(checkpoint, map_location=DEVICE), model)
+        train.load_checkpoint(torch.load(checkpoint, map_location=DEVICE), model)
     
-    train_utils.check_accuracy(loader=val_loader,model=model,metric=metric,loss_fn=loss_fn, device=DEVICE_NAME, filename="Train")
+    train.check_accuracy(loader=val_loader,model=model,metric=metric,loss_fn=loss_fn, device=DEVICE_NAME, filename="Train")
 
     for epoch in range(NUM_EPOCHS):
         epoch_loss = train_per_epoch(train_loader, model, optimizer, loss_fn, scaler)
@@ -71,13 +71,13 @@ def train(model, loss_fn, optimizer, metric, scaler, early_stopping, checkpoint=
             "state_dict": model.state_dict(),
             "optimizer":optimizer.state_dict(),
         }
-        train_utils.save_checkpoint(checkpoint, filename=f"{model.__class__.__name__}_checkpoint_{epoch}.pth.tar")
+        train.save_checkpoint(checkpoint, filename=f"{model.__class__.__name__}_checkpoint_{epoch}.pth.tar")
 
         # early stopping based on validation loss
-        train_utils.check_accuracy(loader=val_loader,model=model,metric=metric,loss_fn=loss_fn, device=DEVICE_NAME, filename="Train")
+        train.check_accuracy(loader=val_loader,model=model,metric=metric,loss_fn=loss_fn, device=DEVICE_NAME, filename="Train")
 
         # passes the current epoch validation loss to early stopping class
-        train_utils.log_training(epoch=epoch, loss=epoch_loss, best=early_stopping.best, wait=early_stopping.wait)
+        train.log_training(epoch=epoch, loss=epoch_loss, best=early_stopping.best, wait=early_stopping.wait)
         if (early_stopping.step(metric.total_val_loss[-1])):
             break
 
