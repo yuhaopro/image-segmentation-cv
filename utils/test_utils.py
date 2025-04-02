@@ -1,17 +1,14 @@
 from typing import List
-from clip_seg_model import ClipSegmentation
-from unet_model import UNET
-import utils 
 import torch.nn as nn
 import torch
-from dataset import PetDataset
+from ..dataset.pet import PetDataset
 import os
 from torch.utils.data import DataLoader
 import albumentations as A
 import matplotlib.pyplot as plt
 import numpy as np
 
-from utils import load_checkpoint
+from ..utils.train_utils import load_checkpoint, check_accuracy, MetricStorage
 
 IMAGE_HEIGHT = 256
 IMAGE_WIDTH = 256
@@ -58,7 +55,7 @@ def test(transform, metric, model=None):
         shuffle=True,
     )
     loss_fn = nn.CrossEntropyLoss()
-    utils.check_accuracy(loader=test_loader, model=model, metric=metric, loss_fn=loss_fn, device=DEVICE_NAME, filename="Test", mode='test')
+    check_accuracy(loader=test_loader, model=model, metric=metric, loss_fn=loss_fn, device=DEVICE_NAME, filename="Test", mode='test')
 
 def test_gaussian_pixel_noise(model, perturbations, metric):
 
@@ -79,8 +76,8 @@ def test_gaussian_pixel_noise(model, perturbations, metric):
 def test_gaussian_blur():
 
     perturbations = []
-    metric = utils.MetricStorage()
-    model = ClipSegmentation(in_channels=3, out_channels=3).to(DEVICE)
+    metric = MetricStorage()
+    # model = ClipSegmentation(in_channels=3, out_channels=3).to(DEVICE)
     # 0, 1, 2 ... 9
     for count in range(0, 10):
         def gaussian_blur(image, mask):
@@ -112,8 +109,9 @@ if __name__ == "__main__":
 
 
     perturbations = []
-    metric = utils.MetricStorage()
-    model = ClipSegmentation(in_channels=3, out_channels=3).to(DEVICE)
+    metric = MetricStorage()
+    # model = ClipSegmentation(in_channels=3, out_channels=3).to(DEVICE)
+    model = None
 
     try:
         load_checkpoint(torch.load(CHECKPOINT, map_location=torch.device(DEVICE_NAME)), model=model)

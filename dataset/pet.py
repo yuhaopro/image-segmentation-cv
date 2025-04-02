@@ -6,6 +6,8 @@ import torch
 import albumentations as A
 import random
 
+from utils.dataset_utils import convert_color_to_class
+
 random.seed(42)
 
 IMAGE_HEIGHT = 256
@@ -31,25 +33,6 @@ color_to_class_test = {
     75: 2,  # Dog
     255: 3,  # Boundary
 }
-
-
-def convert_class_to_color(class_mask, class_to_color):
-    placeholder = torch.zeros_like(class_mask)
-    for class_idx, color in class_to_color.items():
-        placeholder[class_mask == class_idx] = color
-    return placeholder
-
-
-def convert_color_to_class(color_mask, color_to_class):
-    placeholder = torch.zeros_like(color_mask)
-    for color_idx, _class in color_to_class.items():
-        placeholder[color_mask == color_idx] = _class
-    return placeholder
-
-
-def remove_class_dimension(mask):
-    class_indices = torch.argmax(mask, dim=0)
-    return class_indices
 
 
 default_transform = A.Compose(
@@ -124,3 +107,4 @@ class PetDataset(Dataset):
             mask = convert_color_to_class(mask, color_to_class)
         # mask = add_class_dimension(mask)
         return image, mask
+

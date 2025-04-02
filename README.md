@@ -33,17 +33,6 @@ The semantic mask is as follows.
 ## Setting up the Dataset
 The dataset can be found [here](https://uoe-my.sharepoint.com/:u:/g/personal/s2526104_ed_ac_uk/EXBmCQKQ7KdAmOr0P9c1lFwBwYaqySQ1d8gps8I7CcRPnw?e=VBex8K).
 
-### Linux
-```bash
-# install 7zip
-sudo apt install p7zip-full
-
-# unzip with 7zip
-7z x Dataset.zip
-```
-### Windows
-1. Download 7zip or use Windows built in archive tool
-2. Extract the `Dataset.zip` file into your project directory
 ## Setting up the Python environment
 
 ```py
@@ -56,8 +45,8 @@ source env/bin/activate
 # installing dependencies
 python3 -r requirements.txt
 
-# exit the environment
-deactivate
+# adding project root to python
+export PYTHONPATH="$PYTHONPATH:/path/to/projectroot"
 ```
 
 ### CLIP
