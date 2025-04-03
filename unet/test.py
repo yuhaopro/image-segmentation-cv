@@ -17,7 +17,7 @@ NUM_WORKERS = 4
 PIN_MEMORY = True
 DEVICE_NAME = "cpu"
 DEVICE =  torch.device(DEVICE_NAME)
-CHECKPOINT = f"{os.getcwd()}/unet/UNET_checkpoint_12.pth.tar"
+CHECKPOINT = f"{os.getcwd()}/unet/UNET_checkpoint_13.pth.tar"
 
 def test():
     # creating test dataset
@@ -29,11 +29,10 @@ def test():
         pin_memory=PIN_MEMORY,
         shuffle=False,
     )
-    loss_fn = nn.CrossEntropyLoss()
     model = UNET(in_channels=3, out_channels=3).to(device=DEVICE)
     helper.load_checkpoint(checkpoint=CHECKPOINT, model=model, device=DEVICE)
     metricStorage = metric.MetricStorage()
-    metric.check_accuracy(loader=test_loader, model=model, metric=metricStorage, loss_fn=loss_fn, device=DEVICE_NAME, mode='test')
+    metric.check_accuracy(loader=test_loader, model=model, metric=metricStorage, device=DEVICE_NAME)
     metricStorage.print_test_scores()
 
 if __name__ == "__main__":

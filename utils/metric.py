@@ -39,7 +39,7 @@ def compute_dice_coefficient(preds, targets, eps=1e-8):
     dice = (2 * intersection) / (preds.sum() + targets.sum() + eps)
     return dice.item()
 
-def check_accuracy(loader, model, metric: MetricStorage, loss_fn, device="cuda"):
+def check_accuracy(loader, model, metric: MetricStorage, loss_fn=None, device="cuda"):
     model.eval()
     with torch.no_grad():
         for image, mask in loader:
@@ -51,8 +51,9 @@ def check_accuracy(loader, model, metric: MetricStorage, loss_fn, device="cuda")
 
             output = model(image)
 
-            loss = loss_fn(output, mask)
-            metric.val_loss.append(loss.item())
+            if loss_fn != None:
+                loss = loss_fn(output, mask)
+                metric.val_loss.append(loss.item())
             # print(f"Evaluation Loss: {loss}")
             # print(f"output shape: {output.size()}") # output shape: torch.Size([64, 3, 256, 256])
             probabilities = F.softmax(output, dim=1) 
