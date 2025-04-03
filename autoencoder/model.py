@@ -7,12 +7,15 @@ class Autoencoder(nn.Module):
         # Encoder
         self.encoder = nn.Sequential(
             nn.Conv2d(3, 64, kernel_size=3, padding=1),
+            nn.BatchNorm2d(num_features=64),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2),
             nn.Conv2d(64, 128, kernel_size=3, padding=1),
+            nn.BatchNorm2d(num_features=128),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2),
             nn.Conv2d(128, 256, kernel_size=3, padding=1),
+            nn.BatchNorm2d(num_features=256),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2),
         )
