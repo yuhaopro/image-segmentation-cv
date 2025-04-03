@@ -1,6 +1,7 @@
 from typing import List
 import torch
 import statistics
+import torch.nn.functional as F
 class MetricStorage:
     """
     A class to store metric values (specifically IoU and Dice scores)
