@@ -2,13 +2,8 @@ import os
 from torch.utils.data import Dataset
 import numpy as np
 from PIL import Image
-import torch
-import albumentations as A
-import random
-from dataset.augmentation import default_transform
 from utils.dataset import convert_color_to_class
-
-
+from dataset.augmentation import default_transform
 """
 This file contains the PetDataset class, augmentation pipelines, and utility functions for datasets. 
 """
@@ -67,14 +62,15 @@ class PetDataset(Dataset):
         image = np.array(Image.open(img_path).convert("RGB"))
         mask = np.array(Image.open(mask_path).convert("L"), dtype=np.float32)
 
-        augmented = self.transform(image=image, mask=mask)
-        image = augmented["image"]
-        mask = augmented["mask"]
+        org_shape = image.shape[1:] # (3,400,600)
+        if self.transform != None:
+            augmented = self.transform(image=image, mask=mask)
+            image = augmented["image"]
+            mask = augmented["mask"]
         if self.mode == "test":
             # this does not convert boundary to background
             mask = convert_color_to_class(mask, color_to_class_test)
         else:
             mask = convert_color_to_class(mask, color_to_class)
-        # mask = add_class_dimension(mask)
-        return image, mask
-
+        
+        return image, mask 

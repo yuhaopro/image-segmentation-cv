@@ -62,10 +62,11 @@ class UNET(nn.Module):
         self.bottleneck = DoubleConv(features[-1], features[-1]*2)
 
         # out channels should correspond to num of classes
-        self.final_conv = nn.Conv2d(features[0], out_channels, kernel_size=1)
+        self.final_conv = nn.Conv2d(features[0], out_channels, kernel_size=(1,1), stride=1, padding="valid")
         
     def forward(self, x):
         
+        image_shape = x.shape[2:]
         # [64, 128, 256, 512]
         skip_connections = []
 
@@ -90,7 +91,8 @@ class UNET(nn.Module):
             concat_skip = torch.cat((skip_connection, x), dim=1)
             x = self.ups[idx+1](concat_skip)
         
-        return self.final_conv(x)
+        x = self.final_conv(x)
+        return TF.resize(x, size=image_shape, interpolation=TF.InterpolationMode.BILINEAR)
 
 def test():
     x = torch.randn((3, 3, 161, 161))
@@ -98,8 +100,6 @@ def test():
     preds = model(x)
     print(f"input shape: {x.shape}")
     print(f"input shape: {preds.shape}")
-    
-    print("model is working!")
 
 
 if __name__ == "__main__":
