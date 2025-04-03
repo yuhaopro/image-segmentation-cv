@@ -9,3 +9,4 @@ pipreqs
 transformers==4.49.0
 opencv-python
 pytest
+statistics

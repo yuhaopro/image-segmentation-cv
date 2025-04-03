@@ -5,13 +5,9 @@ from PIL import Image
 import torch
 import albumentations as A
 import random
-
+from dataset.augmentation import default_transform
 from utils.dataset import convert_color_to_class
 
-random.seed(42)
-
-IMAGE_HEIGHT = 256
-IMAGE_WIDTH = 256
 
 """
 This file contains the PetDataset class, augmentation pipelines, and utility functions for datasets. 
@@ -33,32 +29,6 @@ color_to_class_test = {
     75: 2,  # Dog
     255: 3,  # Boundary
 }
-
-
-default_transform = A.Compose(
-    [
-        # A.Resize(height=IMAGE_HEIGHT, width=IMAGE_WIDTH),
-        # A.CenterCrop(height=IMAGE_HEIGHT, width=IMAGE_WIDTH, pad_if_needed=True),
-        A.ToTensorV2(transpose_mask=True),
-    ],
-    seed=137,
-    strict=True,
-)
-
-augmented_transform = A.Compose(
-    [
-        A.Resize(height=IMAGE_HEIGHT, width=IMAGE_WIDTH),
-        # A.CenterCrop(height=IMAGE_HEIGHT, width=IMAGE_WIDTH, pad_if_needed=True),
-        A.HorizontalFlip(p=0.5),
-        A.VerticalFlip(p=0.5),
-        A.Rotate(limit=(-40, 40)),
-        A.ElasticTransform(p=0.5),
-        A.ColorJitter(),
-        A.ToTensorV2(transpose_mask=True),
-    ],
-    seed=137,
-    strict=True,
-)
 
 
 class PetDataset(Dataset):
