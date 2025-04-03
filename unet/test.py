@@ -31,7 +31,7 @@ def test():
     )
     loss_fn = nn.CrossEntropyLoss()
     model = UNET(in_channels=3, out_channels=3).to(device=DEVICE)
-    helper.load_checkpoint(checkpoint=CHECKPOINT, model=model)
+    helper.load_checkpoint(checkpoint=CHECKPOINT, model=model, device=DEVICE)
     metricStorage = metric.MetricStorage()
     metric.check_accuracy(loader=test_loader, model=model, metric=metricStorage, loss_fn=loss_fn, device=DEVICE_NAME, mode='test')
     metricStorage.print_test_scores()

@@ -8,7 +8,7 @@ IMAGE_WIDTH = 256
 
 default_transform = A.Compose(
     [
-        # A.Resize(height=IMAGE_HEIGHT, width=IMAGE_WIDTH),
+        A.Resize(height=IMAGE_HEIGHT, width=IMAGE_WIDTH),
         # A.CenterCrop(height=IMAGE_HEIGHT, width=IMAGE_WIDTH, pad_if_needed=True),
         A.ToTensorV2(transpose_mask=True),
     ],
