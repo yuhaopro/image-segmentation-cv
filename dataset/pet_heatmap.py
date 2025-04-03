@@ -65,7 +65,7 @@ class PetHeatmapDataset(Dataset):
         mask_tensor = torch.from_numpy(mask)
         mask_tensor = mask_tensor.permute(2,0,1)
         mask_tensor = Resize(size=(IMAGE_HEIGHT, IMAGE_WIDTH))(mask_tensor)
-        mask = convert_color_to_class(mask_tensor, color_to_class_heatmap)
+        mask_tensor = convert_color_to_class(mask_tensor, color_to_class_heatmap)
 
         return image_tensor, point_tensor, mask_tensor
     

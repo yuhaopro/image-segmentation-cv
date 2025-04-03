@@ -51,7 +51,7 @@ class ClipPointSeg(nn.Module):
         # x is a batch of images: [B, C, H, W]
         batch_size = image.shape[0]
         device = image.device
-        print(f"Image Shape:{image.shape}, Point Shape: {point.shape}")
+        # print(f"Image Shape:{image.shape}, Point Shape: {point.shape}")
         # process image through CLIP
         inputs_image = self.processor(images=image, return_tensors="pt")
         inputs_image = {k: v.to(device) for k, v in inputs_image.items()}
@@ -65,7 +65,7 @@ class ClipPointSeg(nn.Module):
 
         # process heatmap through CLIP
         inputs_point = self.processor(images=point, return_tensors="pt")
-        inputs_point = {k: v.to(device) for k, v in inputs_image.items()}
+        inputs_point = {k: v.to(device) for k, v in inputs_point.items()}
         outputs_point = self.model(**inputs_point).last_hidden_state  # [B, S, HS]
         features_point = outputs_point[:, 1:, :]  # [B, S-1, HS]
         features_point = features_point.permute(0, 2, 1)  # [B, HS, S-1]
