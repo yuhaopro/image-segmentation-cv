@@ -8,8 +8,8 @@ import albumentations as A
 import matplotlib.pyplot as plt
 import numpy as np
 from model import ClipSegmentation
-
-from .train import load_checkpoint, check_accuracy, MetricStorage
+from utils.metric import check_accuracy, MetricStorage
+from utils.helper import load_checkpoint
 
 IMAGE_HEIGHT = 256
 IMAGE_WIDTH = 256
@@ -20,8 +20,29 @@ NUM_WORKERS = 4
 PIN_MEMORY = True
 DEVICE_NAME = "cuda"
 DEVICE =  torch.device(DEVICE_NAME)
-CHECKPOINT = "UNET_checkpoint_12.pth.tar"
+CHECKPOINT = "CLIP_checkpoint_10.pth.tar"
 
+def test():
+    perturbations = []
+    metricStorage = MetricStorage()
+    model = ClipSegmentation(in_channels=3, out_channels=3).to(DEVICE)
+
+    try:
+        load_checkpoint(torch.load(CHECKPOINT, map_location=torch.device(DEVICE_NAME)), model=model)
+    except:
+        print(f"Please load a valid model!")
+    # creating test dataset
+    test_dataset = PetDataset(image_dir=TEST_IMAGE_DIR, mask_dir=TEST_MASK_DIR, mode="test")
+    test_loader = DataLoader(
+        test_dataset,
+        batch_size=BATCH_SIZE,
+        num_workers=NUM_WORKERS,
+        pin_memory=PIN_MEMORY,
+        shuffle=False,
+    )
+    check_accuracy(loader=test_loader, model=model, metric=metricStorage, device=DEVICE_NAME)
+    metricStorage.print_test_scores()
+    
 def plot_relationship(perturbation_name: str, perturbations: List[int], dice_scores: List[float]):
     # Create the plot
     plt.figure(figsize=(10, 6))  # Set figure size
@@ -45,18 +66,7 @@ def plot_relationship(perturbation_name: str, perturbations: List[int], dice_sco
     # Display the plot
     plt.show()
 
-def test(transform, metric, model=None):
-    # creating test dataset
-    test_dataset = PetDataset(image_dir=TEST_IMAGE_DIR, mask_dir=TEST_MASK_DIR, transform=transform, mode="test")
-    test_loader = DataLoader(
-        test_dataset,
-        batch_size=BATCH_SIZE,
-        num_workers=NUM_WORKERS,
-        pin_memory=PIN_MEMORY,
-        shuffle=True,
-    )
-    loss_fn = nn.CrossEntropyLoss()
-    check_accuracy(loader=test_loader, model=model, metric=metric, loss_fn=loss_fn, device=DEVICE_NAME, filename="Test", mode='test')
+
 
 def test_gaussian_pixel_noise(model, perturbations, metric):
 
@@ -106,20 +116,11 @@ def test_gaussian_blur():
     
     plot_relationship(perturbation_name="gaussian_blur", perturbations=perturbations, dice_scores=metric.average_dice_score)
 
+    def test_dice_score():
+        pass
+
+    def test_iou():
+        pass
+
 if __name__ == "__main__":
-
-
-    perturbations = []
-    metric = MetricStorage()
-    # model = ClipSegmentation(in_channels=3, out_channels=3).to(DEVICE)
-    model = None
-
-    try:
-        load_checkpoint(torch.load(CHECKPOINT, map_location=torch.device(DEVICE_NAME)), model=model)
-    except:
-        print(f"Please load a valid model!")
-
-    test_gaussian_pixel_noise(perturbations=perturbations, metric=metric, model=model)
-    # model = ClipSegmentation(in_channels=3, out_channels=3).to(DEVICE)
-    # load_checkpoint(torch.load(CHECKPOINT, map_location=torch.device('cpu')), model=model)
-    # print(model)
+    test()
