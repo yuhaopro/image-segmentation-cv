@@ -22,7 +22,7 @@ class DoubleConv(nn.Module):
         return self.conv(x)
     
 class ClipPointSeg(nn.Module):
-    def __init__(self, in_channels=3, out_channels=3, hidden_size=768, patch_size=32, image_size=224):
+    def __init__(self, in_channels=3, out_channels=1, hidden_size=768, patch_size=32, image_size=224):
         super(ClipPointSeg, self).__init__()
         
         # Load pretrained CLIP vision model and processor

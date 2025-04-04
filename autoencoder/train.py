@@ -4,8 +4,8 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import random
-from model import Autoencoder
-from model import AutoencoderWithSegmentationHead
+from autoencoder.old_model import Autoencoder
+from autoencoder.old_model import AutoencoderWithSegmentationHead
 
 random.seed(42)
 BATCH_SIZE = 64

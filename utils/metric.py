@@ -88,3 +88,39 @@ def check_accuracy(loader, model, metric: MetricStorage, loss_fn=None, device="c
 
             loop.set_postfix()
     model.train()
+    
+def check_accuracy_pointclip(loader, model, metric: MetricStorage, device="cuda"):
+    loop = tqdm(loader)
+    model.eval()
+    with torch.no_grad():
+        for batch_idx, (image, point, mask) in enumerate(loop):
+            # print(f"batch: {batch_idx} images: {images.size()}, points: {points.size()}, masks: {masks.size()}")
+            image = image.float().to(device=device)
+            mask = mask.float().to(device=device) # batch, class, height, width
+            point = point.float().to(device=device)
+            output_logits = model(image, point)
+
+            # Threshold logits directly at 0
+            predictions_bool = (output_logits > 0)
+
+            # Convert boolean predictions to integers (0 or 1)
+            predictions_int = predictions_bool.int()
+
+            # background
+            pred_bg_mask = (predictions_int == 0).float()
+            actual_bg_mask = (mask == 0).float()
+            bg_dice_score = (compute_dice_coefficient(pred_bg_mask, actual_bg_mask))
+            bg_iou_score = (compute_iou(pred_bg_mask, actual_bg_mask))
+            # object
+            pred_obj_mask = (predictions_int == 1).float()
+            actual_obj_mask = (mask == 1).float()
+            obj_dice_score = (compute_dice_coefficient(pred_obj_mask, actual_obj_mask))
+            obj_iou_score = (compute_iou(pred_obj_mask, actual_obj_mask))
+
+            average_iou_score = (bg_iou_score + obj_iou_score) / 2
+            average_dice_score = (bg_dice_score + obj_dice_score) / 2
+            metric.iou_scores.append(average_iou_score)
+            metric.dice_scores.append(average_dice_score)
+
+            loop.set_postfix()
+    model.train()

@@ -22,6 +22,7 @@ color_to_class_heatmap = {
 }
 
 
+
 def convert_class_to_color(class_mask, class_to_color):
     placeholder = torch.zeros_like(class_mask)
     for class_idx, color in class_to_color.items():

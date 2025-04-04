@@ -1,6 +1,6 @@
 import torch.nn as nn
 import torch
-from model import Autoencoder, AutoencoderWithSegmentationHead
+from autoencoder.old_model import Autoencoder, AutoencoderWithSegmentationHead
 from dataset.pet import PetDataset
 import os
 from torch.utils.data import DataLoader
