@@ -5,7 +5,7 @@ from dataset.pet import PetDataset
 import os
 from torch.utils.data import DataLoader
 import utils.metric as metric
-from dataset.augmentation import augmented_transform
+from dataset.augmentation import default_transform
 import utils.helper as helper
 
 IMAGE_HEIGHT = 256
@@ -21,7 +21,7 @@ CHECKPOINT = f"{os.getcwd()}/unet/UNET_checkpoint_13.pth.tar"
 
 def test():
     # creating test dataset
-    test_dataset = PetDataset(image_dir=TEST_IMAGE_DIR, mask_dir=TEST_MASK_DIR, transform=augmented_transform, mode="test")
+    test_dataset = PetDataset(image_dir=TEST_IMAGE_DIR, mask_dir=TEST_MASK_DIR, transform=default_transform, mode="test")
     test_loader = DataLoader(
         test_dataset,
         batch_size=BATCH_SIZE,
