@@ -6,7 +6,7 @@ The segmentation models that will be used are:
 | :----------- | :-------- | :--------- |
 | UNET         | 0.36      | 0.45       |
 | Autoencoder  | -         | -          |
-| CLIP         | -         | -          |
+| CLIP         | 0.55      | 0.61       |
 | Prompt-based | -         | -          |
 
 ## What is image segmentation?

@@ -20,8 +20,8 @@ class MetricStorage:
         mean_iou_score = statistics.mean(self.iou_scores)
         mean_dice_score = statistics.mean(self.dice_scores)
         print(
-            f"Mean IOU: {mean_iou_score=:.02f}"
-            f"Mean Dice: {mean_dice_score=:.02f}"
+            f"{mean_iou_score=:.02f}\n"
+            f"{mean_dice_score=:.02f}\n"
         )
     
 def compute_iou(preds, targets, eps=1e-8):

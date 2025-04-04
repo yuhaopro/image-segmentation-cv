@@ -1,7 +1,7 @@
 from typing import List
 import torch.nn as nn
 import torch
-from ..dataset.pet import PetDataset
+from dataset.pet import PetDataset
 import os
 from torch.utils.data import DataLoader
 import albumentations as A
