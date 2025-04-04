@@ -10,6 +10,7 @@ import numpy as np
 from model import ClipSegmentation
 from utils.metric import check_accuracy, MetricStorage
 from utils.helper import load_checkpoint
+from dataset.augmentation import default_transform
 
 IMAGE_HEIGHT = 256
 IMAGE_WIDTH = 256
@@ -22,7 +23,7 @@ DEVICE_NAME = "cuda"
 DEVICE =  torch.device(DEVICE_NAME)
 CHECKPOINT = "CLIP_checkpoint_10.pth.tar"
 
-def test():
+def test(transform=default_transform):
     perturbations = []
     metricStorage = MetricStorage()
     model = ClipSegmentation(in_channels=3, out_channels=3).to(DEVICE)
@@ -32,7 +33,7 @@ def test():
     except:
         print(f"Please load a valid model!")
     # creating test dataset
-    test_dataset = PetDataset(image_dir=TEST_IMAGE_DIR, mask_dir=TEST_MASK_DIR, mode="test")
+    test_dataset = PetDataset(image_dir=TEST_IMAGE_DIR, mask_dir=TEST_MASK_DIR,transform=transform, mode="test")
     test_loader = DataLoader(
         test_dataset,
         batch_size=BATCH_SIZE,
@@ -111,7 +112,7 @@ def test_gaussian_blur():
 
             return output
 
-        test(transform=gaussian_blur, metric=metric, model=model)
+        test(transform=gaussian_blur)
         perturbations.append(count)
     
     plot_relationship(perturbation_name="gaussian_blur", perturbations=perturbations, dice_scores=metric.average_dice_score)
