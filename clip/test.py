@@ -28,10 +28,7 @@ def test(transform=default_transform):
     metricStorage = MetricStorage()
     model = ClipSegmentation(in_channels=3, out_channels=3).to(DEVICE)
 
-    try:
-        load_checkpoint(torch.load(CHECKPOINT, map_location=torch.device(DEVICE_NAME)), model=model)
-    except:
-        print(f"Please load a valid model!")
+    load_checkpoint(checkpoint=CHECKPOINT, model=model, device=DEVICE)
     # creating test dataset
     test_dataset = PetDataset(image_dir=TEST_IMAGE_DIR, mask_dir=TEST_MASK_DIR,transform=transform, mode="test")
     test_loader = DataLoader(
@@ -79,7 +76,7 @@ def test_gaussian_pixel_noise(model, perturbations, metric):
             A.GaussNoise(std_range=(gaussian_std_value/255, gaussian_std_value/255)),
             A.ToTensorV2(transpose_mask=True),           
         ], seed=137, strict=True)
-        test(transform=gaussian_pixel_noise, metric=metric, model=model)
+        test(transform=gaussian_pixel_noise)
         perturbations.append(gaussian_std_value)
     
     plot_relationship(perturbation_name="gaussian_pixel_noise", perturbations=perturbations, dice_scores=metric.average_dice_score)
