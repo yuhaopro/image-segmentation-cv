@@ -2,6 +2,8 @@ from typing import List
 import torch
 import statistics
 import torch.nn.functional as F
+from tqdm import tqdm
+
 class MetricStorage:
     """
     A class to store metric values (specifically IoU and Dice scores)
@@ -40,9 +42,10 @@ def compute_dice_coefficient(preds, targets, eps=1e-8):
     return dice.item()
 
 def check_accuracy(loader, model, metric: MetricStorage, loss_fn=None, device="cuda"):
+    loop = tqdm(loader)
     model.eval()
     with torch.no_grad():
-        for image, mask in loader:
+        for image, mask in loop:
             image = image.float().to(device)
             # print(f"input shape: {x.size()}") # input shape: torch.Size([64, 3, 256, 256])
 
@@ -83,4 +86,5 @@ def check_accuracy(loader, model, metric: MetricStorage, loss_fn=None, device="c
             metric.iou_scores.append(average_iou_score)
             metric.dice_scores.append(average_dice_score)
 
+            loop.set_postfix()
     model.train()
