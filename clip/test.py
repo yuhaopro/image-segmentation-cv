@@ -117,11 +117,6 @@ def test_gaussian_blur():
     
     plot_relationship(perturbation_name="gaussian_blur", perturbations=perturbations, dice_scores=metric.average_dice_score)
 
-    def test_dice_score():
-        pass
-
-    def test_iou():
-        pass
 
 if __name__ == "__main__":
     test()
