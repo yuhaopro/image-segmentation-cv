@@ -23,6 +23,8 @@ class MetricStorage:
             f"{mean_iou_score=:.02f}\n"
             f"{mean_dice_score=:.02f}\n"
         )
+    def get_mean_dice_score(self):
+        return statistics.mean(self.dice_scores)
     
 def compute_iou(preds, targets, eps=1e-8):
     intersection = (preds * targets).sum()

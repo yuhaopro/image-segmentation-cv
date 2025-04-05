@@ -40,6 +40,7 @@ def test(transform=default_transform):
     )
     check_accuracy(loader=test_loader, model=model, metric=metricStorage, device=DEVICE_NAME)
     metricStorage.print_test_scores()
+    return metricStorage.get_mean_dice_score()
     
 def plot_relationship(perturbation_name: str, perturbations: List[int], dice_scores: List[float]):
     # Create the plot
@@ -66,8 +67,9 @@ def plot_relationship(perturbation_name: str, perturbations: List[int], dice_sco
 
 
 
-def test_gaussian_pixel_noise(model, perturbations, metric):
-
+def test_gaussian_pixel_noise():
+    perturbations = []
+    mean_dice_scores = []
     # 0, 2, 4, .... 18
     for gaussian_std_value in range(0, 19, 2):
     # define perturbation
@@ -76,17 +78,17 @@ def test_gaussian_pixel_noise(model, perturbations, metric):
             A.GaussNoise(std_range=(gaussian_std_value/255, gaussian_std_value/255)),
             A.ToTensorV2(transpose_mask=True),           
         ], seed=137, strict=True)
-        test(transform=gaussian_pixel_noise)
+        mean_dice_score = test(transform=gaussian_pixel_noise)
         perturbations.append(gaussian_std_value)
+        mean_dice_scores.append(mean_dice_score)
     
-    plot_relationship(perturbation_name="gaussian_pixel_noise", perturbations=perturbations, dice_scores=metric.average_dice_score)
+    plot_relationship(perturbation_name="gaussian_pixel_noise", perturbations=perturbations, dice_scores=mean_dice_scores)
 
 
 def test_gaussian_blur():
 
     perturbations = []
-    metric = MetricStorage()
-    # model = ClipSegmentation(in_channels=3, out_channels=3).to(DEVICE)
+    mean_dice_scores = []
     # 0, 1, 2 ... 9
     for count in range(0, 10):
         def gaussian_blur(image, mask):
@@ -109,11 +111,14 @@ def test_gaussian_blur():
 
             return output
 
-        test(transform=gaussian_blur)
+        mean_dice_score = test(transform=gaussian_blur)
         perturbations.append(count)
+        mean_dice_scores.append(mean_dice_score)
     
-    plot_relationship(perturbation_name="gaussian_blur", perturbations=perturbations, dice_scores=metric.average_dice_score)
+    plot_relationship(perturbation_name="gaussian_blur", perturbations=perturbations, dice_scores=mean_dice_scores)
 
 
 if __name__ == "__main__":
     test()
+    test_gaussian_pixel_noise()
+    test_gaussian_blur()
