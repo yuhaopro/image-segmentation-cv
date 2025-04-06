@@ -11,3 +11,5 @@ opencv-python
 pytest
 statistics
 scikit-image
+seaborn
+pandas
