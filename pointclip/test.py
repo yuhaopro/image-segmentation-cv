@@ -34,7 +34,7 @@ def test():
     helper.load_checkpoint(checkpoint=CHECKPOINT, model=model, device=DEVICE)
     metricStorage = metric.MetricStorage()
     metric.check_accuracy_pointclip(loader=test_loader, model=model, metric=metricStorage, device=DEVICE_NAME)
-    metricStorage.print_test_scores()
+    metricStorage.print_test_scores_pointclip()
 
 def example():
 
