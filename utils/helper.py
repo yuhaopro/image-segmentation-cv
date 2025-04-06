@@ -7,4 +7,4 @@ def load_checkpoint(checkpoint: str, model, device):
     print("=> Loading checkpoint")
     # original saved file with DataParallel
     checkpoint_info = torch.load(checkpoint, map_location=device)
-    model.load_state_dict(checkpoint_info['state_dict'])    
+    model.load_state_dict(checkpoint_info['state_dict'])

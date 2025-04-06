@@ -10,3 +10,4 @@ transformers==4.49.0
 opencv-python
 pytest
 statistics
+scikit-image
