@@ -34,10 +34,11 @@ class ClipSegmentation(nn.Module):
         self.grid_size = image_size // patch_size
         
         # Projection layer to reshape features
-        self.proj = nn.Conv2d(hidden_size, 512, kernel_size=1)
+        self.proj = nn.Conv2d(hidden_size, 1024, kernel_size=1)
         
         # Decoder layers
         self.decoder = nn.Sequential(
+            nn.ConvTranspose2d(1024, 512, kernel_size=2, stride=2),
             DoubleConv(512,512),
             nn.ConvTranspose2d(512, 256, kernel_size=2, stride=2),
             nn.ReLU(),

@@ -1,6 +1,10 @@
 import torch
 import torch.nn as nn
+from torchview import draw_graph
 import torchvision.transforms.functional as TF 
+import matplotlib.pyplot as plt
+import os 
+SAVE_DIRECTORY = f"{os.getcwd()}/unet/"
 
 """
 DoubleConv is used for both the encoding and decoding processes, and should be able to accomodate the change in channels at each stage during downsampling and upsampling.
@@ -95,11 +99,10 @@ class UNET(nn.Module):
         return TF.resize(x, size=image_shape, interpolation=TF.InterpolationMode.BILINEAR)
 
 def test():
-    x = torch.randn((3, 3, 161, 161))
+    x = torch.randn((3, 3, 256, 256))
     model = UNET(in_channels=3, out_channels=3)
-    preds = model(x)
-    print(f"input shape: {x.shape}")
-    print(f"input shape: {preds.shape}")
+    
+    draw_graph(model=model, input_data=x, save_graph=True, filename="UNET_architecture", directory=SAVE_DIRECTORY)
 
 
 if __name__ == "__main__":

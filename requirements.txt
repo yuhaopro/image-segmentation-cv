@@ -13,3 +13,5 @@ statistics
 scikit-image
 seaborn
 pandas
+graphviz
+git+https://github.com/mert-kurttutan/torchview.git
