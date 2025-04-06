@@ -13,7 +13,7 @@ PIN_MEMORY = True
 NUM_WORKERS = 4
 LEARNING_RATE = 1e-5
 LOAD_MODEL = True
-NUM_EPOCHS = 20
+NUM_EPOCHS = 50
 DEVICE_NAME = "cuda"
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
