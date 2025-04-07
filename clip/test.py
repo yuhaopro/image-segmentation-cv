@@ -215,11 +215,11 @@ def test_image_contrast_increase():
 
         mean_dice_score = test(transform=transform)
         mean_dice_scores.append(mean_dice_score)
-        plot_relationship(
-            perturbation_name="image_contrast_increase",
-            perturbations=contrast_factors,
-            dice_scores=mean_dice_scores,
-        )
+    plot_relationship(
+        perturbation_name="image_contrast_increase",
+        perturbations=contrast_factors,
+        dice_scores=mean_dice_scores,
+    )
 
 
 def test_image_contrast_decrease():
@@ -242,11 +242,11 @@ def test_image_contrast_decrease():
         )
         mean_dice_score = test(transform=transform)
         mean_dice_scores.append(mean_dice_score)
-        plot_relationship(
-            perturbation_name="image_contrast_decrease",
-            perturbations=contrast_factors,
-            dice_scores=mean_dice_scores,
-        )
+    plot_relationship(
+        perturbation_name="image_contrast_decrease",
+        perturbations=contrast_factors,
+        dice_scores=mean_dice_scores,
+    )
 
 
 def add_fixed_brightness(image, value, **kwargs):
@@ -282,11 +282,11 @@ def test_image_brightness_increase():
         )
         mean_dice_score = test(transform=transform)
         mean_dice_scores.append(mean_dice_score)
-        plot_relationship(
-            perturbation_name="image_brightness_increase",
-            perturbations=brightness_increase_arr,
-            dice_scores=mean_dice_scores,
-        )
+    plot_relationship(
+        perturbation_name="image_brightness_increase",
+        perturbations=brightness_increase_arr,
+        dice_scores=mean_dice_scores,
+    )
 
 
 def test_image_brightness_decrease():
@@ -310,11 +310,11 @@ def test_image_brightness_decrease():
         )
         mean_dice_score = test(transform=transform)
         mean_dice_scores.append(mean_dice_score)
-        plot_relationship(
-            perturbation_name="image_brightness_decrease",
-            perturbations=brightness_decrease_arr,
-            dice_scores=mean_dice_scores,
-        )
+    plot_relationship(
+        perturbation_name="image_brightness_decrease",
+        perturbations=brightness_decrease_arr,
+        dice_scores=mean_dice_scores,
+    )
 
 
 def test_occlusion_of_image_increase():
@@ -353,11 +353,11 @@ def test_occlusion_of_image_increase():
 
         mean_dice_score = test(transform=transform)
         mean_dice_scores.append(mean_dice_score)
-        plot_relationship(
-            perturbation_name="occlusion_image_increase",
-            perturbations=occlusions,
-            dice_scores=mean_dice_scores,
-        )
+    plot_relationship(
+        perturbation_name="occlusion_image_increase",
+        perturbations=occlusions,
+        dice_scores=mean_dice_scores,
+    )
 
 def apply_skimage_s_and_p(image, amount, **kwargs):# -> Any | NDArray[unsignedinteger[_8Bit]] | Any:
     """
@@ -403,12 +403,11 @@ def test_salt_and_pepper_noise():
 
         mean_dice_score = test(transform=tranform)
         mean_dice_scores.append(mean_dice_score)
-        plot_relationship(
-            perturbation_name="salt_and_pepper_increase",
-            perturbations=salt_and_pepper_arr,
-            dice_scores=mean_dice_scores,
-        )
-
+    plot_relationship(
+        perturbation_name="salt_and_pepper_increase",
+        perturbations=salt_and_pepper_arr,
+        dice_scores=mean_dice_scores,
+    )
 
 if __name__ == "__main__":
     test()
