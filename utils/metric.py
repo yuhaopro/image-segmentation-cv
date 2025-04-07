@@ -119,7 +119,7 @@ def compute_accuracy(preds, targets):
     num_correct = (preds == targets).sum()
     num_pixels = torch.numel(preds)
 
-    return num_correct / num_pixels
+    return (num_correct / num_pixels).item()
 
 
 def compute_dice_coefficient(preds, targets, eps=1e-8):
