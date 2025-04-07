@@ -170,9 +170,9 @@ def check_accuracy(loader, model, metric: MetricStorage, loss_fn=None, device="c
             cat_iou_score = compute_iou(pred_cat_mask, actual_cat_mask)
             cat_accuracy_score = compute_accuracy(pred_cat_mask, actual_cat_mask)
 
-            metric.bg_iou_scores.append(cat_iou_score)
-            metric.bg_dice_scores.append(cat_dice_score)
-            metric.bg_accuracy_scores.append(cat_accuracy_score)
+            metric.cat_iou_scores.append(cat_iou_score)
+            metric.cat_dice_scores.append(cat_dice_score)
+            metric.cat_accuracy_scores.append(cat_accuracy_score)
 
             # dog
             pred_dog_mask = (pred_classes == 2).float()
@@ -181,9 +181,9 @@ def check_accuracy(loader, model, metric: MetricStorage, loss_fn=None, device="c
             dog_iou_score = compute_iou(pred_dog_mask, actual_dog_mask)
             dog_accuracy_score = compute_accuracy(pred_dog_mask, actual_dog_mask)
 
-            metric.bg_iou_scores.append(dog_iou_score)
-            metric.bg_dice_scores.append(dog_dice_score)
-            metric.bg_accuracy_scores.append(dog_accuracy_score)
+            metric.dog_iou_scores.append(dog_iou_score)
+            metric.dog_dice_scores.append(dog_dice_score)
+            metric.dog_accuracy_scores.append(dog_accuracy_score)
 
             loop.set_postfix()
     model.train()
