@@ -22,7 +22,7 @@ NUM_WORKERS = 4
 PIN_MEMORY = True
 DEVICE_NAME = "cuda"
 DEVICE = torch.device(DEVICE_NAME)
-CHECKPOINT = "CLIP_checkpoint_10.pth.tar"
+CHECKPOINT = "ClipSegmentation_checkpoint_11.pth.tar"
 
 
 def test(transform=default_transform):
