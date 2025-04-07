@@ -324,7 +324,7 @@ def test_occlusion_of_image_increase():
     for occlusion in occlusions:
         transform = None
         if occlusion == 0:
-            tranform = A.Compose(
+            transform = A.Compose(
                 [
                     A.Resize(height=IMAGE_HEIGHT, width=IMAGE_WIDTH),
                     A.ToTensorV2(transpose_mask=True),
@@ -334,7 +334,7 @@ def test_occlusion_of_image_increase():
             )
 
         else:
-            tranform = A.Compose(
+            transform = A.Compose(
                 [
                     A.Resize(height=IMAGE_HEIGHT, width=IMAGE_WIDTH),
                     A.CoarseDropout(
