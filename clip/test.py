@@ -206,6 +206,7 @@ def test_image_contrast_increase():
                     brightness_limit=(0, 0),
                     contrast_limit=(contrast_factor - 1.0, contrast_factor - 1.0),
                     brightness_by_max=False,
+                    p=1
                 ),
                 A.ToTensorV2(transpose_mask=True),
             ],
@@ -234,6 +235,7 @@ def test_image_contrast_decrease():
                     brightness_limit=(0, 0),
                     contrast_limit=(contrast_factor - 1.0, contrast_factor - 1.0),
                     brightness_by_max=False,
+                    p=1
                 ),
                 A.ToTensorV2(transpose_mask=True),
             ],
@@ -341,6 +343,7 @@ def test_occlusion_of_image_increase():
                         hole_height_range=(IMAGE_HEIGHT, IMAGE_HEIGHT),
                         hole_width_range=(IMAGE_WIDTH, IMAGE_WIDTH),
                         fill=0,
+                        p=1
                     ),
                     A.ToTensorV2(transpose_mask=True),
                 ],
