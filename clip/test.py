@@ -53,7 +53,7 @@ def test(transform=default_transform):
 
 
 def plot_relationship(
-    perturbation_name: str, perturbations: List[int], dice_scores: List[float]
+    perturbation_name: str, perturbations, dice_scores
 ):
     # Create the plot
     plt.figure(figsize=(10, 6))  # Set figure size
