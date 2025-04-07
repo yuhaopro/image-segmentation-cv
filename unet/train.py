@@ -16,7 +16,7 @@ IMAGE_DIR = f"{os.getcwd()}/Dataset/TrainVal/color"
 MASK_DIR = f"{os.getcwd()}/Dataset/TrainVal/label"
 
 random.seed(42)
-BATCH_SIZE = 16
+BATCH_SIZE = 64
 PIN_MEMORY = True
 NUM_WORKERS = 4
 LEARNING_RATE = 1e-4

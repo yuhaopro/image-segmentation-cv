@@ -49,7 +49,7 @@ def test(transform=default_transform):
         loader=test_loader, model=model, metric=metricStorage, device=DEVICE_NAME
     )
     metricStorage.print_test_scores()
-    return metricStorage.get_mean_dice_score_pointclip()
+    return metricStorage.get_mean_dice_score()
 
 
 def plot_relationship(

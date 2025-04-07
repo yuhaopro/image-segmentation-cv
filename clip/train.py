@@ -16,14 +16,14 @@ IMAGE_DIR = f"{os.getcwd()}/Dataset/TrainVal/color"
 MASK_DIR = f"{os.getcwd()}/Dataset/TrainVal/label"
 
 random.seed(42)
-BATCH_SIZE = 2
+BATCH_SIZE = 64
 PIN_MEMORY = True
 NUM_WORKERS = 4
 LEARNING_RATE = 1e-5
 NUM_EPOCHS = 50
 LOAD_MODEL = False
 CHECKPOINT = "UNET_checkpoint_12.pth.tar"
-DEVICE_NAME = "cpu"
+DEVICE_NAME = "cuda"
 DEVICE =  torch.device(DEVICE_NAME)
 
 

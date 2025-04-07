@@ -15,7 +15,7 @@ TEST_MASK_DIR = f"{os.getcwd()}/Dataset/Test/label"
 BATCH_SIZE = 64
 NUM_WORKERS = 4
 PIN_MEMORY = True
-DEVICE_NAME = "cpu"
+DEVICE_NAME = "cuda"
 DEVICE =  torch.device(DEVICE_NAME)
 CHECKPOINT = f"{os.getcwd()}/unet/UNET_checkpoint_13.pth.tar"
 
