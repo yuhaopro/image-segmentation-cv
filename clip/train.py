@@ -95,7 +95,7 @@ def train():
 
         # passes the current epoch validation loss to early stopping class
         train_utils.log_training(epoch=epoch, loss=epoch_loss, best=early_stopping.best, wait=early_stopping.wait)
-        if (early_stopping.step(metric.val_loss[-1])):
+        if (early_stopping.step(metricStorage.val_loss[-1])):
             break
 
 if __name__ == "__main__":
