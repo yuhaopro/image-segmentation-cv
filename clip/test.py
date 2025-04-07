@@ -372,5 +372,11 @@ def test_salt_and_pepper_noise():
 
 if __name__ == "__main__":
     test()
-    test_gaussian_pixel_noise()
+    # test_gaussian_pixel_noise()
     # test_gaussian_blur()
+    # test_image_contrast_increase()
+    # test_image_contrast_decrease()
+    # test_image_brightness_increase()
+    # test_image_brightness_decrease()
+    # test_occlusion_of_image_increase()
+    # test_salt_and_pepper_noise()
