@@ -1,4 +1,5 @@
 from typing import List
+from numpy.distutils.npy_pkg_config import value
 import torch.nn as nn
 import torch
 from dataset.pet import PetDataset
@@ -12,6 +13,7 @@ from utils.metric import check_accuracy, MetricStorage
 from utils.helper import load_checkpoint
 from dataset.augmentation import default_transform
 from skimage.util import random_noise
+from functools import partial
 
 IMAGE_HEIGHT = 256
 IMAGE_WIDTH = 256
@@ -130,15 +132,14 @@ def test_gaussian_pixel_noise():
     mean_dice_scores = []
     # 0, 2, 4, .... 18
     for gaussian_std_value in range(0, 19, 2):
-        # define perturbation
+        add_noise_func = partial(add_gaussian_noise, std_dev=float(gaussian_std_value))
+
         gaussian_pixel_noise = A.Compose(
             [
                 A.Resize(height=IMAGE_HEIGHT, width=IMAGE_WIDTH),
                 A.Lambda(
-                    image=lambda img, **kwargs: add_gaussian_noise(
-                        image=img, std_dev=gaussian_std_value
-                    ),
-                    p=1.0,
+                    image=add_noise_func,
+                    p=1
                 ),
                 A.ToTensorV2(transpose_mask=True),
             ],
@@ -266,13 +267,12 @@ def test_image_brightness_increase():
     mean_dice_scores = []
 
     for brightness_increase in brightness_increase_arr:
+        add_fixed_brightness_func = partial(add_fixed_brightness, value=brightness_increase)
         transform = A.Compose(
             [
                 A.Resize(height=IMAGE_HEIGHT, width=IMAGE_WIDTH),
                 A.Lambda(
-                    image=lambda img, **kwargs: add_fixed_brightness(
-                        img, value=brightness_increase
-                    ),
+                    image=add_fixed_brightness_func,
                     p=1.0,
                 ),
                 A.ToTensorV2(transpose_mask=True),
@@ -294,13 +294,13 @@ def test_image_brightness_decrease():
     mean_dice_scores = []
 
     for brightness_decrease in brightness_decrease_arr:
+        add_fixed_brightness_func = partial(add_fixed_brightness, value=brightness_decrease)
+
         transform = A.Compose(
             [
                 A.Resize(height=IMAGE_HEIGHT, width=IMAGE_WIDTH),
                 A.Lambda(
-                    image=lambda img, **kwargs: add_fixed_brightness(
-                        img, value=(-brightness_decrease)
-                    ),
+                    image=add_fixed_brightness_func,
                     p=1.0,
                 ),
                 A.ToTensorV2(transpose_mask=True),
@@ -385,13 +385,12 @@ def test_salt_and_pepper_noise():
     salt_and_pepper_arr = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45]
     mean_dice_scores = []
     for salt_and_pepper in salt_and_pepper_arr:
+        apply_skimage_s_and_p_func = partial(apply_skimage_s_and_p, amount=salt_and_pepper)
         tranform = A.Compose(
             [
                 A.Resize(height=IMAGE_HEIGHT, width=IMAGE_WIDTH),
                 A.Lambda(
-                    image=lambda img, **kwargs: apply_skimage_s_and_p(
-                        img, salt_and_pepper
-                    ),
+                    image=apply_skimage_s_and_p_func,
                     p=1.0,
                 ),
                 A.ToTensorV2(transpose_mask=True),
