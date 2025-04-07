@@ -91,7 +91,7 @@ def train():
         helper.save_checkpoint(checkpoint, filename=f"{model.__class__.__name__}_checkpoint_{epoch}.pth.tar")
 
         # early stopping based on validation loss
-        metric.check_accuracy(loader=val_loader,model=model,metric=metricStorage,loss_fn=loss_fn, device=DEVICE_NAME, filename="Train")
+        metric.check_accuracy(loader=val_loader,model=model,metric=metricStorage,loss_fn=loss_fn, device=DEVICE_NAME)
 
         # passes the current epoch validation loss to early stopping class
         train_utils.log_training(epoch=epoch, loss=epoch_loss, best=early_stopping.best, wait=early_stopping.wait)
