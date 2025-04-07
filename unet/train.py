@@ -16,14 +16,14 @@ IMAGE_DIR = f"{os.getcwd()}/Dataset/TrainVal/color"
 MASK_DIR = f"{os.getcwd()}/Dataset/TrainVal/label"
 
 random.seed(42)
-BATCH_SIZE = 64
+BATCH_SIZE = 16
 PIN_MEMORY = True
 NUM_WORKERS = 4
 LEARNING_RATE = 1e-4
 NUM_EPOCHS = 50
 LOAD_MODEL = False
 CHECKPOINT = "UNET_checkpoint_12.pth.tar"
-DEVICE_NAME = "cpu"
+DEVICE_NAME = "cuda"
 DEVICE =  torch.device(DEVICE_NAME)
 
 
@@ -91,11 +91,11 @@ def train():
         helper.save_checkpoint(checkpoint, filename=f"{model.__class__.__name__}_checkpoint_{epoch}.pth.tar")
 
         # early stopping based on validation loss
-        metric.check_accuracy(loader=val_loader,model=model,metric=metricStorage,loss_fn=loss_fn, device=DEVICE_NAME, filename="Train")
+        metric.check_accuracy(loader=val_loader,model=model,metric=metricStorage,loss_fn=loss_fn, device=DEVICE_NAME)
 
         # passes the current epoch validation loss to early stopping class
         train_utils.log_training(epoch=epoch, loss=epoch_loss, best=early_stopping.best, wait=early_stopping.wait)
-        if (early_stopping.step(metric.val_loss[-1])):
+        if (early_stopping.step(metricStorage.val_loss[-1])):
             break
 
 if __name__ == "__main__":

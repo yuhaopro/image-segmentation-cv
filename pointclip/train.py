@@ -1,5 +1,7 @@
 from dataset.pet_heatmap import PetHeatmapDataset
-import utils.train as utils
+import utils.metric as metric
+import utils.helper as helper
+import utils.train as train_utils
 import torch
 import random
 import os
@@ -56,7 +58,7 @@ def train_per_epoch(loader, model, optimizer, loss_fn, scaler):
     average_epoch_loss = epoch_loss / len(loader)
     return average_epoch_loss
 
-def train(model, loss_fn, optimizer, metric, scaler, early_stopping=None):
+def train(model, loss_fn, optimizer, metricStorage, scaler, early_stopping=None):
 
     # create data loaders
     train_val_dataset = PetHeatmapDataset(image_dir=TRAIN_IMAGE_DIR, mask_dir=TRAIN_MASK_DIR, points_dir=TRAIN_POINT_DIR)
@@ -66,14 +68,13 @@ def train(model, loss_fn, optimizer, metric, scaler, early_stopping=None):
 
     # initialize the model, loss and optimizer
     if LOAD_MODEL:
-        utils.load_checkpoint(torch.load(CHECKPOINT, map_location=DEVICE), model)
+        metric.load_checkpoint(torch.load(CHECKPOINT, map_location=DEVICE), model)
     
     # saves accuracy of current epoch
     # utils.check_accuracy(loader=val_loader,model=model,metric=metric,loss_fn=loss_fn, device=DEVICE_NAME, filename="Train")
 
     for epoch in range(NUM_EPOCHS):
         epoch_loss = train_per_epoch(train_loader, model, optimizer, loss_fn, scaler)
-        metric.total_loss.append(epoch_loss)
 
         # save model
         checkpoint = {
@@ -81,13 +82,13 @@ def train(model, loss_fn, optimizer, metric, scaler, early_stopping=None):
             "optimizer":optimizer.state_dict(),
         }
         
-        utils.save_checkpoint(checkpoint, filename=f"{model.__class__.__name__}_checkpoint_{epoch}.pth.tar")
+        helper.save_checkpoint(checkpoint, filename=f"{model.__class__.__name__}_checkpoint_{epoch}.pth.tar")
 
         # early stopping based on validation loss
-        # utils.check_accuracy(loader=val_loader,model=model,metric=metric,loss_fn=loss_fn, device=DEVICE_NAME, filename="Train")
+        metric.check_accuracy_pointclip(loader=val_loader,model=model,metric=metricStorage,loss_fn=loss_fn, device=DEVICE_NAME, filename="Train")
 
         # passes the current epoch validation loss to early stopping class
-        utils.log_training(epoch=epoch, loss=epoch_loss, best=early_stopping.best, wait=early_stopping.wait)
+        metric.log_training(epoch=epoch, loss=epoch_loss, best=early_stopping.best, wait=early_stopping.wait)
         # if (early_stopping != None and early_stopping.step(metric.total_val_loss[-1])):
         #     break
 
@@ -96,10 +97,10 @@ if __name__ == "__main__":
     pass
     model = ClipPointSeg(in_channels=3, out_channels=1).to(DEVICE)
     if LOAD_MODEL:
-        utils.load_checkpoint(checkpoint=CHECKPOINT, model=model)
+        helper.load_checkpoint(checkpoint=CHECKPOINT, model=model)
     loss_fn = nn.BCEWithLogitsLoss()
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
-    metric = utils.MetricStorage()
+    metricStorage = metric.MetricStorage()
     scaler = torch.GradScaler()
-    early_stopping = utils.EarlyStopping(min_delta=0.001, patience=3)
-    train(model=model, loss_fn=loss_fn, optimizer=optimizer, metric=metric, scaler=scaler, early_stopping=early_stopping)
+    early_stopping = train_utils.EarlyStopping(min_delta=0.01, patience=3)
+    train(model=model, loss_fn=loss_fn, optimizer=optimizer, metric=metricStorage, scaler=scaler, early_stopping=early_stopping)
