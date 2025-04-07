@@ -1,5 +1,4 @@
 from typing import List
-from numpy.distutils.npy_pkg_config import value
 import torch.nn as nn
 import torch
 from dataset.pet import PetDataset
