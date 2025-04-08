@@ -52,7 +52,7 @@ def test(transform=default_transform):
 
 
 def plot_relationship(
-    perturbation_name: str, perturbations, dice_scores
+    perturbation_name: str, perturbations, dice_scores, invert_x_axis=False
 ):
     # Create the plot
     plt.figure(figsize=(10, 6))  # Set figure size
@@ -66,7 +66,8 @@ def plot_relationship(
         markersize=8,
         label="Dice Score",
     )
-
+    if invert_x_axis:
+        plt.gca().invert_xaxis()
     # Customize the plot
     plt.xlabel("Perturbation", fontsize=12)
     plt.ylabel("Dice Score", fontsize=12)
@@ -201,8 +202,9 @@ def test_image_contrast_decrease():
         mean_dice_scores.append(mean_dice_score)
     plot_relationship(
         perturbation_name="image_contrast_decrease",
-        perturbations=reversed(contrast_factors),
-        dice_scores=reversed(mean_dice_scores),
+        perturbations=contrast_factors,
+        dice_scores=mean_dice_scores,
+        invert_x_axis=True
     )
 
 
@@ -380,8 +382,8 @@ if __name__ == "__main__":
     # test_gaussian_pixel_noise()
     # test_gaussian_blur()
     # test_image_contrast_increase()
-    # test_image_contrast_decrease()
+    test_image_contrast_decrease()
     # test_image_brightness_increase()
     # test_image_brightness_decrease()
     # test_occlusion_of_image_increase()
-    test_salt_and_pepper_noise()
+    # test_salt_and_pepper_noise()
