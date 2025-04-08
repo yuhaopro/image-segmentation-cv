@@ -31,9 +31,9 @@ def test():
     )
     model = UNET(in_channels=3, out_channels=3).to(device=DEVICE)
     helper.load_checkpoint(checkpoint=CHECKPOINT, model=model, device=DEVICE)
-    metricStorage = metric.MetricStorage()
-    metric.check_accuracy(loader=test_loader, model=model, metric=metricStorage, device=DEVICE_NAME)
-    metricStorage.print_test_scores()
+    metric_storage = metric.MetricStorage()
+    metric.check_accuracy(loader=test_loader, model=model, metric=metric_storage, device=DEVICE_NAME)
+    metric_storage.print_test_scores()
 
 if __name__ == "__main__":
     test()

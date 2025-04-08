@@ -1,3 +1,4 @@
+from PIL import Image
 import torch
 from dataset.pet import PetDataset
 import os
@@ -336,7 +337,7 @@ def apply_skimage_s_and_p(image, amount, **kwargs):# -> Any | NDArray[unsignedin
     return noisy_image_uint8
 
 def test_salt_and_pepper_noise():
-    salt_and_pepper_arr = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45]
+    salt_and_pepper_arr = [0.00, 0.02, 0.04, 0.06, 0.08, 0.10, 0.12, 0.14, 0.16, 0.18]
     mean_dice_scores = []
     for salt_and_pepper in salt_and_pepper_arr:
         apply_skimage_s_and_p_func = partial(apply_skimage_s_and_p, amount=salt_and_pepper)
@@ -362,13 +363,21 @@ def test_salt_and_pepper_noise():
         dice_scores=mean_dice_scores,
     )
 
+def example():
+    image = np.array(Image.open("images/Abyssinian_1_color.png"))
+    model = ClipSegmentation(in_channels=3, out_channels=3).to(device=DEVICE)
+    load_checkpoint(checkpoint=CHECKPOINT, model=model, device=DEVICE)
+    output = model(image)
+    
+
+
 if __name__ == "__main__":
-    test()
-    test_gaussian_pixel_noise()
-    test_gaussian_blur()
-    test_image_contrast_increase()
-    test_image_contrast_decrease()
-    test_image_brightness_increase()
-    test_image_brightness_decrease()
-    test_occlusion_of_image_increase()
+    # test()
+    # test_gaussian_pixel_noise()
+    # test_gaussian_blur()
+    # test_image_contrast_increase()
+    # test_image_contrast_decrease()
+    # test_image_brightness_increase()
+    # test_image_brightness_decrease()
+    # test_occlusion_of_image_increase()
     test_salt_and_pepper_noise()
