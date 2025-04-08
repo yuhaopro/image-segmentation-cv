@@ -25,7 +25,7 @@ CHECKPOINT = "ClipSegmentation_checkpoint_11.pth.tar"
 
 
 def test(transform=default_transform):
-    metricStorage = MetricStorage()
+    metric_storage = MetricStorage()
     model = ClipSegmentation(in_channels=3, out_channels=3).to(DEVICE)
 
     load_checkpoint(checkpoint=CHECKPOINT, model=model, device=DEVICE)
@@ -44,10 +44,10 @@ def test(transform=default_transform):
         shuffle=False,
     )
     check_accuracy(
-        loader=test_loader, model=model, metric=metricStorage, device=DEVICE_NAME
+        loader=test_loader, model=model, metric=metric_storage, device=DEVICE_NAME
     )
-    metricStorage.print_test_scores()
-    return metricStorage.get_mean_dice_score()
+    metric_storage.print_test_scores()
+    return metric_storage.get_mean_dice_score()
 
 
 def plot_relationship(
@@ -74,7 +74,7 @@ def plot_relationship(
     )
     plt.grid(True, linestyle="--", alpha=0.7)  # Add a subtle grid
     plt.xticks(perturbations)  # Show all perturbation values on x-axis
-    plt.yticks(dice_scores)  # Dice scores typically range from 0 to 1
+    plt.yticks(np.arange(0.5, 0.7, 0.02))  # Dice scores typically range from 0 to 1
     plt.legend(loc="lower left", fontsize=10)  # Add a legend
 
     # Adjust layout to prevent clipping
@@ -127,7 +127,7 @@ def test_gaussian_blur():
             # repeatedly convolve x times with gaussian kernel
             transform = A.GaussianBlur(blur_limit=(3, 3), p=1.0)
 
-            for i in range(count):
+            for _ in range(count):
                 output = transform(image=image)
                 image = output["image"]
 
@@ -322,18 +322,16 @@ def apply_skimage_s_and_p(image, amount, **kwargs):# -> Any | NDArray[unsignedin
     """
     if amount == 0:
         return image # No noise to add
-
-    # skimage.util.random_noise converts to float64 in [0, 1] range
-    # applies noise, and returns float64 in [0, 1] range.
+    dtype = image.dtype
     noisy_image_float = random_noise(
-        image,
+        image.astype(np.float32),
         mode='s&p',
         amount=amount,
-        clip=True # Ensures values remain in [0, 1] after noise
+        clip=True,
     )
 
     # Convert back to uint8 [0, 255] range
-    noisy_image_uint8 = (noisy_image_float * 255).astype(np.uint8)
+    noisy_image_uint8 = (noisy_image_float * 255).astype(dtype)
 
     return noisy_image_uint8
 
@@ -366,11 +364,11 @@ def test_salt_and_pepper_noise():
 
 if __name__ == "__main__":
     test()
-    # test_gaussian_pixel_noise()
-    # test_gaussian_blur()
-    # test_image_contrast_increase()
-    # test_image_contrast_decrease()
-    # test_image_brightness_increase()
-    # test_image_brightness_decrease()
-    # test_occlusion_of_image_increase()
-    # test_salt_and_pepper_noise()
+    test_gaussian_pixel_noise()
+    test_gaussian_blur()
+    test_image_contrast_increase()
+    test_image_contrast_decrease()
+    test_image_brightness_increase()
+    test_image_brightness_decrease()
+    test_occlusion_of_image_increase()
+    test_salt_and_pepper_noise()
