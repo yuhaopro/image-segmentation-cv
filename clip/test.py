@@ -201,8 +201,8 @@ def test_image_contrast_decrease():
         mean_dice_scores.append(mean_dice_score)
     plot_relationship(
         perturbation_name="image_contrast_decrease",
-        perturbations=contrast_factors,
-        dice_scores=mean_dice_scores,
+        perturbations=reversed(contrast_factors),
+        dice_scores=reversed(mean_dice_scores),
     )
 
 
@@ -315,23 +315,27 @@ def test_occlusion_of_image_increase():
         perturbations=occlusions,
         dice_scores=mean_dice_scores,
     )
-
-def apply_skimage_s_and_p(image, amount, **kwargs):# -> Any | NDArray[unsignedinteger[_8Bit]] | Any:
+def apply_skimage_s_and_p(image, amount, **kwargs):
     """
     Applies Salt & Pepper noise using skimage and handles dtype conversion.
     Assumes input image is uint8 [0, 255].
+    Amount is the proportion of pixels to replace (0.0 to 1.0).
     """
-    if amount == 0:
+    if amount == 0.0: # Explicit float comparison
         return image # No noise to add
+
+    # Store original dtype (should be uint8)
     dtype = image.dtype
+
     noisy_image_float = random_noise(
-        image.astype(np.float32),
+        image, # Pass the original uint8 image
         mode='s&p',
         amount=amount,
-        clip=True,
+        clip=True, # This clips the output to [0,1] after noise
     )
+    # noisy_image_float is now float64[0,1]
 
-    # Convert back to uint8 [0, 255] range
+    # Convert the float[0,1] result back to the original uint8 [0,255] range
     noisy_image_uint8 = (noisy_image_float * 255).astype(dtype)
 
     return noisy_image_uint8
