@@ -27,7 +27,6 @@ CHECKPOINT = "ClipSegmentation_checkpoint_11.pth.tar"
 
 
 def test(transform=default_transform):
-    perturbations = []
     metricStorage = MetricStorage()
     model = ClipSegmentation(in_channels=3, out_channels=3).to(DEVICE)
 
@@ -77,7 +76,7 @@ def plot_relationship(
     )
     plt.grid(True, linestyle="--", alpha=0.7)  # Add a subtle grid
     plt.xticks(perturbations)  # Show all perturbation values on x-axis
-    plt.yticks(np.arange(0, 1.1, 0.1))  # Dice scores typically range from 0 to 1
+    plt.yticks(dice_scores)  # Dice scores typically range from 0 to 1
     plt.legend(loc="lower left", fontsize=10)  # Add a legend
 
     # Adjust layout to prevent clipping
