@@ -62,7 +62,6 @@ class PetDataset(Dataset):
         image = np.array(Image.open(img_path).convert("RGB"))
         mask = np.array(Image.open(mask_path).convert("L"), dtype=np.float32)
 
-        org_shape = image.shape[1:] # (3,400,600)
         if self.transform != None:
             augmented = self.transform(image=image, mask=mask)
             image = augmented["image"]

@@ -1,4 +1,5 @@
 from typing import List
+from skimage.filters import gaussian
 import torch.nn as nn
 import torch
 from dataset.pet import PetDataset
@@ -86,59 +87,16 @@ def plot_relationship(
     # Display the plot
     plt.show()
 
-def add_gaussian_noise(image: np.ndarray, std_dev: float) -> np.ndarray:
-    """
-    Adds Gaussian noise to an image.
-
-    Args:
-        image (np.ndarray): Input image (expected to be uint8, range 0-255).
-        std_dev (float): The standard deviation of the Gaussian noise to add.
-
-    Returns:
-        np.ndarray: Image with added Gaussian noise, clipped to 0-255 and
-                    converted back to uint8.
-    """
-    # Ensure the standard deviation is non-negative
-    if std_dev < 0:
-        raise ValueError("Standard deviation cannot be negative.")
-
-    # If std_dev is 0, no noise is added, return a copy of the original image
-    # in the expected uint8 format.
-    if std_dev == 0:
-        return image.astype(np.uint8)
-
-    # Generate Gaussian noise with mean 0 and the specified standard deviation
-    # The noise array should have the same shape as the image
-    # Convert image to float32 to allow for intermediate float values during addition
-    image_float = image.astype(np.float32)
-    gaussian_noise = np.random.normal(loc=0.0, scale=std_dev, size=image.shape)
-
-    # Add the noise to the image
-    noisy_image_float = image_float + gaussian_noise
-
-    # Clip the pixel values to ensure they are within the valid range [0, 255]
-    # Values below 0 become 0, values above 255 become 255.
-    clipped_image_float = np.clip(noisy_image_float, 0, 255)
-
-    # Convert the image back to unsigned 8-bit integers (uint8)
-    noisy_image_uint8 = clipped_image_float.astype(np.uint8)
-
-    return noisy_image_uint8
-
 def test_gaussian_pixel_noise():
     perturbations = []
     mean_dice_scores = []
     # 0, 2, 4, .... 18
     for gaussian_std_value in range(0, 19, 2):
-        add_noise_func = partial(add_gaussian_noise, std_dev=float(gaussian_std_value))
 
         gaussian_pixel_noise = A.Compose(
             [
                 A.Resize(height=IMAGE_HEIGHT, width=IMAGE_WIDTH),
-                A.Lambda(
-                    image=add_noise_func,
-                    p=1
-                ),
+                A.GaussNoise(std_range=(gaussian_std_value/255, gaussian_std_value/255),p=1),
                 A.ToTensorV2(transpose_mask=True),
             ],
             seed=137,
