@@ -16,7 +16,7 @@ TEST_POINTS_DIR = f"{os.getcwd()}/Dataset/Test/heatmap/points"
 BATCH_SIZE = 64
 NUM_WORKERS = 4
 PIN_MEMORY = True
-DEVICE_NAME = "cuda"
+DEVICE_NAME = "cpu"
 DEVICE =  torch.device(DEVICE_NAME)
 CHECKPOINT = f"{os.getcwd()}/pointclip/ClipPointSeg_checkpoint_9.pth.tar"
 

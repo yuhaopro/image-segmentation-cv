@@ -1,6 +1,6 @@
 import torch.nn as nn
 import torch
-from autoencoder.old_model import Autoencoder, AutoencoderWithSegmentationHead
+from autoencoder.model import Autoencoder, AutoencoderWithSegmentationHead
 from dataset.pet import PetDataset
 import os
 from torch.utils.data import DataLoader
@@ -34,9 +34,9 @@ def test():
     model = AutoencoderWithSegmentationHead(autoencoder.encoder, num_classes=3).to(DEVICE)
     
     helper.load_checkpoint(checkpoint=CHECKPOINT, model=model, device=DEVICE)
-    metricStorage = metric.MetricStorage()
-    metric.check_accuracy(loader=test_loader, model=model, metric=metricStorage, device=DEVICE_NAME)
-    metricStorage.print_test_scores()
+    metric_storage = metric.MetricStorage()
+    metric.check_accuracy(loader=test_loader, model=model, metric=metric_storage, device=DEVICE_NAME)
+    metric_storage.print_test_scores()
 
 if __name__ == "__main__":
     test()

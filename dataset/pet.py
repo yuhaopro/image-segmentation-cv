@@ -48,6 +48,11 @@ class PetDataset(Dataset):
         self.mask_dir = f"{mask_dir}/{pet_class}" if pet_class != None else mask_dir
         self.transform = transform
         self.images = os.listdir(self.mask_dir)
+
+        if pet_class == None:
+            self.images.remove("dogs")
+            self.images.remove("cats")
+
         self.mode = mode
 
     def __len__(self):
