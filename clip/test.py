@@ -1,6 +1,3 @@
-from typing import List
-from skimage.filters import gaussian
-import torch.nn as nn
 import torch
 from dataset.pet import PetDataset
 import os
@@ -297,8 +294,8 @@ def test_occlusion_of_image_increase():
                     A.Resize(height=IMAGE_HEIGHT, width=IMAGE_WIDTH),
                     A.CoarseDropout(
                         num_holes_range=(1, 1),
-                        hole_height_range=(IMAGE_HEIGHT, IMAGE_HEIGHT),
-                        hole_width_range=(IMAGE_WIDTH, IMAGE_WIDTH),
+                        hole_height_range=(occlusion, occlusion),
+                        hole_width_range=(occlusion, occlusion),
                         fill=0,
                         p=1
                     ),
@@ -323,7 +320,7 @@ def apply_skimage_s_and_p(image, amount, **kwargs):# -> Any | NDArray[unsignedin
     Applies Salt & Pepper noise using skimage and handles dtype conversion.
     Assumes input image is uint8 [0, 255].
     """
-    if amount == 0.00:
+    if amount == 0:
         return image # No noise to add
 
     # skimage.util.random_noise converts to float64 in [0, 1] range
