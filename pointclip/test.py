@@ -16,7 +16,7 @@ TEST_POINTS_DIR = f"{os.getcwd()}/Dataset/Test/heatmap/points"
 BATCH_SIZE = 64
 NUM_WORKERS = 4
 PIN_MEMORY = True
-DEVICE_NAME = "cpu"
+DEVICE_NAME = "cuda"
 DEVICE =  torch.device(DEVICE_NAME)
 CHECKPOINT = f"{os.getcwd()}/pointclip/ClipPointSeg_checkpoint_9.pth.tar"
 
@@ -32,9 +32,9 @@ def test():
     )
     model = ClipPointSeg(in_channels=3, out_channels=1).to(DEVICE)
     helper.load_checkpoint(checkpoint=CHECKPOINT, model=model, device=DEVICE)
-    metricStorage = metric.MetricStorage()
-    metric.check_accuracy_pointclip(loader=test_loader, model=model, metric=metricStorage, device=DEVICE_NAME)
-    metricStorage.print_test_scores_pointclip()
+    metric_storage = metric.MetricStorage()
+    metric.check_accuracy_pointclip(loader=test_loader, model=model, metric=metric_storage, device=DEVICE_NAME)
+    metric_storage.print_test_scores_pointclip()
 
 def example():
 
@@ -42,7 +42,7 @@ def example():
     model = ClipPointSeg(in_channels=3, out_channels=1).to(DEVICE)
     helper.load_checkpoint(checkpoint=CHECKPOINT, model=model, device=DEVICE)
     test_dataset = PetHeatmapDataset(image_dir=TEST_IMAGE_DIR, mask_dir=TEST_MASK_DIR, points_dir=TEST_POINTS_DIR)
-    num_samples_to_show = 5
+    num_samples_to_show = 1
     model.eval()
     fig, axes = plt.subplots(num_samples_to_show, 2, figsize=(8, 4 * num_samples_to_show))
     if num_samples_to_show == 1:
@@ -71,8 +71,6 @@ def example():
 
         image_np = image.cpu().numpy().transpose(1, 2, 0)
         point_np = point.cpu().numpy().transpose(1, 2, 0)
-        # ax.imshow(image_np, alpha=1.0)
-        # ax.imshow(point_np, alpha=0.6)
         ax_left = axes[i, 0] 
         ax_left.imshow(image_np, alpha=1.0) # Base image
         ax_left.imshow(point_np, cmap='hot', alpha=0.6) # Point heatmap overlay
@@ -87,5 +85,5 @@ def example():
     plt.tight_layout(rect=[0, 0.03, 1, 0.97]) # Adjust layout to make room for suptitle
     plt.show()
 if __name__ == "__main__":
-    test()
-    # example()
+    # test()
+    example()
