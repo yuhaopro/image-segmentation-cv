@@ -24,7 +24,7 @@ class Autoencoder(nn.Module):
             nn.ConvTranspose2d(128, 64, kernel_size=3, stride=2, padding=1, output_padding=1),
             nn.ReLU(),
             nn.ConvTranspose2d(64, 3, kernel_size=3, stride=2, padding=1, output_padding=1),
-            nn.Sigmoid()  # 输出归一化到 [0,1] 之间
+            nn.Sigmoid()  # Normailize to [0,1]
         )
 
     def forward(self, x):
