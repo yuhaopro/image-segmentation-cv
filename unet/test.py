@@ -1,5 +1,6 @@
 from PIL import Image
 import numpy as np
+from torch.distributions import wishart
 import torch.nn as nn
 import torch
 from model import UNET
@@ -11,6 +12,7 @@ from dataset.augmentation import default_transform
 import utils.helper as helper
 from torchvision.utils import save_image
 import torch.nn.functional as F
+import albumentations as A
 
 IMAGE_HEIGHT = 256
 IMAGE_WIDTH = 256
@@ -39,7 +41,7 @@ def test():
     metric.check_accuracy(loader=test_loader, model=model, metric=metric_storage, device=DEVICE_NAME)
     metric_storage.print_test_scores()
 
-def example():
+def save_example():
     image = np.array(Image.open("images/Abyssinian_1_color.jpg"))
     model = UNET(in_channels=3, out_channels=3).to(device=DEVICE)
     helper.load_checkpoint(checkpoint=CHECKPOINT, model=model, device=DEVICE)
@@ -51,7 +53,20 @@ def example():
     pred_classes = torch.argmax(probabilities, dim=1)
 
     save_image(pred_classes.float(), fp="unet_pred.png")
+
+def plot_example():
+    image = np.array(Image.open("images/Abyssinian_1_color.jpg"))
+    pred = np.array(Image.open(f"{os.getcwd()}/unet/unet_pred.png"))
+    shape = image.shape
+    pipeline = A.Compose([
+        A.Resize(height=shape[0], width=shape[1], p=1),
+    ])
+    output = pipeline(image=pred)
+    pred = output["image"]
+    helper.plot_images_side_by_side(image, pred, title1="Image", title2="Prediction")
+
     
 if __name__ == "__main__":
     # test()
-    example()
+    # save_example()
+    plot_example()

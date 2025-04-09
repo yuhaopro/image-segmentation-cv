@@ -7,6 +7,7 @@ import albumentations as A
 import matplotlib.pyplot as plt
 import numpy as np
 from model import ClipSegmentation, save_image
+from utils import helper
 from utils.metric import check_accuracy, MetricStorage
 from utils.helper import load_checkpoint
 from dataset.augmentation import default_transform
@@ -383,9 +384,20 @@ def example():
 
     save_image(pred_classes.float(), fp="clip_pred.png")
 
+def plot_example():
+    image = np.array(Image.open("images/Abyssinian_1_color.jpg"))
+    pred = np.array(Image.open(f"{os.getcwd()}/clip/clip_pred.png"))
+    shape = image.shape
+    pipeline = A.Compose([
+        A.Resize(height=shape[0], width=shape[1], p=1),
+    ])
+    output = pipeline(image=pred)
+    pred = output["image"]
+    helper.plot_images_side_by_side(image, pred, title1="Image", title2="Prediction")
 
 if __name__ == "__main__":
-    example()
+    plot_example()
+    # example()
     # test()
     # test_gaussian_pixel_noise()
     # test_gaussian_blur()
