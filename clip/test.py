@@ -6,12 +6,13 @@ from torch.utils.data import DataLoader
 import albumentations as A
 import matplotlib.pyplot as plt
 import numpy as np
-from model import ClipSegmentation
+from model import ClipSegmentation, save_image
 from utils.metric import check_accuracy, MetricStorage
 from utils.helper import load_checkpoint
 from dataset.augmentation import default_transform
 from skimage.util import random_noise
 from functools import partial
+import torch.nn.functional as F
 
 IMAGE_HEIGHT = 256
 IMAGE_WIDTH = 256
@@ -20,9 +21,9 @@ TEST_MASK_DIR = f"{os.getcwd()}/Dataset/Test/label"
 BATCH_SIZE = 64
 NUM_WORKERS = 4
 PIN_MEMORY = True
-DEVICE_NAME = "cuda"
+DEVICE_NAME = "cpu"
 DEVICE = torch.device(DEVICE_NAME)
-CHECKPOINT = "ClipSegmentation_checkpoint_11.pth.tar"
+CHECKPOINT = f"{os.getcwd()}/clip/ClipSegmentation_checkpoint_11.pth.tar"
 
 
 def test(transform=default_transform):
@@ -370,19 +371,26 @@ def test_salt_and_pepper_noise():
     )
 
 def example():
-    image = np.array(Image.open("images/Abyssinian_1_color.png"))
+    image = np.array(Image.open("images/Abyssinian_1_color.jpg"))
     model = ClipSegmentation(in_channels=3, out_channels=3).to(device=DEVICE)
     load_checkpoint(checkpoint=CHECKPOINT, model=model, device=DEVICE)
+    output = default_transform(image=image)
+    image = output["image"]
+    image = image.float().unsqueeze(0).to(DEVICE)
     output = model(image)
-    
+    probabilities = F.softmax(output, dim=1)
+    pred_classes = torch.argmax(probabilities, dim=1)
+
+    save_image(pred_classes.float(), fp="clip_pred.png")
 
 
 if __name__ == "__main__":
+    example()
     # test()
     # test_gaussian_pixel_noise()
     # test_gaussian_blur()
     # test_image_contrast_increase()
-    test_image_contrast_decrease()
+    # test_image_contrast_decrease()
     # test_image_brightness_increase()
     # test_image_brightness_decrease()
     # test_occlusion_of_image_increase()
